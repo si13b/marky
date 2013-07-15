@@ -1,4 +1,4 @@
-marknote.editor = new Class({
+marky.editor = new Class({
 	Implements: [Options, Events],
 
 	Binds: [

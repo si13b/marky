@@ -1,4 +1,4 @@
-marknote.nav = new Class({
+marky.nav = new Class({
 	Implements: [Options, Events],
 
 	Binds: [

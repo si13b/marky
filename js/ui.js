@@ -1,10 +1,11 @@
-var marknote = {};
+var marky = {};
 
 (function () {
 	var ui = new Class({
 		Implements: [Options, Events],
 	
 		Binds: [
+			'render'
 		],
 	
 		options: {
@@ -15,6 +16,10 @@ var marknote = {};
 		initialize: function(options) {
 			this.setOptions(options);
 			
+			
+		},
+		
+		render: function() {
 			var editor = ace.edit("aceeditor");
 			editor.setTheme("ace/theme/monokai");
 			editor.getSession().setMode("ace/mode/markdown");
@@ -23,6 +28,6 @@ var marknote = {};
 	});
 
 	window.addEvent('domready', function() {
-		marknote.ui = new ui();
+		marky.ui = new ui();
 	});
 })();
