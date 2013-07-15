@@ -1,4 +1,4 @@
-Copyright (c) 2011-2013 by Simon Bracegirdle and contributors.
+Copyright (c) 2013 Simon Bracegirdle and contributors.
 See AUTHORS for more details.
 
 Some rights reserved.

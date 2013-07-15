@@ -76,8 +76,30 @@ h1 {
 	width: 20%;
 }
 
-.main > .content > .nav > ul {
+.main > .content > .nav > .opts {
+	text-align: center;
+	border-bottom: 1pt dotted #ccc;
+}
+
+.main > .content > .nav > .opts > div {
+	display: inline-block;
+	color: #888;
+	cursor: pointer;
+	font-family: 'Joti One', cursive;
+	font-size: 200%;
 	margin: 0;
+	padding: 0;
+	width: 40px;
+	text-align: center;
+	text-shadow: 2px 2px 0 #ddd;
+}
+
+.main > .content > .nav > .opts > div:hover {
+	background-color: #ddd;
+}
+
+.main > .content > .nav > ul {
+	margin: 8px 0 0;
 	padding: 0;
 }
 
@@ -87,7 +109,17 @@ h1 {
 	font-size: 90%;
 	list-style-type: none;
 	margin: 0;
-	padding: 4px 8px;
+	padding: 4px 8px 8px 24px;
+}
+
+.main > .content > .nav > ul > li.folder:before {
+	border: 5px solid transparent;
+	border-left-color: #888;
+	content: ' ';
+	width: 0;
+	height: 0;
+	position: absolute;
+	margin: 7px 0 0 -16px;
 }
 
 .main > .content > .nav > ul > li:hover {
