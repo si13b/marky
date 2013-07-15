@@ -25,19 +25,19 @@ marky.nav = new Class({
 			'class': 'opts'
 		}).adopt(
 			new Element('div', {
-				'html': '⋆',
+				'html': '+',
 				'title': 'New'
 			}),
 			new Element('div', {
-				'html': '☖',
+				'html': '❐',
 				'title': 'Folder'
 			}),
 			new Element('div', {
-				'html': '⬏',
+				'html': '⧎',
 				'title': 'Rename'
 			}),
 			new Element('div', {
-				'html': '☓',
+				'html': '✕',
 				'title': 'Delete'
 			})
 		);

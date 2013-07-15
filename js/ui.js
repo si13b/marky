@@ -26,6 +26,8 @@ var marky = {};
 			editor.getSession().setMode("ace/mode/markdown");
 			
 			this._nav = new marky.nav();
+			
+			// TODO bottom tabs? Edit, Preview, Manage (icon)
 		}
 	
 	});
