@@ -5,7 +5,8 @@ var marky = {};
 		Implements: [Options, Events],
 	
 		Binds: [
-			'render'
+			'render',
+			'_renderNav'
 		],
 	
 		options: {
@@ -26,10 +27,14 @@ var marky = {};
 			editor.setTheme("ace/theme/monokai");
 			editor.getSession().setMode("ace/mode/markdown");
 			
-			this._db = new marky.db({});
-			this._nav = new marky.nav({}, this._db);
-			
+			this._db = new marky.db({
+				onOpen: this._renderNav
+			});
 			// TODO bottom tabs? Edit, Preview, Manage (icon)
+		},
+		
+		_renderNav: function() {
+			this._nav = new marky.nav({}, this._db);
 		}
 	
 	});

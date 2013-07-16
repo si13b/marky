@@ -3,19 +3,26 @@ marky.db = new Class({
 
 	Binds: [
 		'open',
-		'retrieve',
-		'store'
+		'_opened',
+		'_upgrade',
+		'getTree',
+		'getContent',
+		'addNote',
+		'deleteNote',
+		'saveContent'
 	],
 
 	options: {
 		dbname: 'markyDB',
-		treestore: 'tree',
-		version: 1
+		notestore: 'note',
+		version: 1,
+		// onOpen: function() {}
+		// onError: function() {}
 	},
 	
 	element: null,
 	_request: null,
-	_objectStore: null,
+	_db: null,
 
 	initialize: function(options) {
 		this.setOptions(options);
@@ -32,45 +39,131 @@ marky.db = new Class({
 		
 		this._request = window.indexedDB.open(this.options.dbname, this.options.version);
 		
-		this._request.onupgradeneeded = function(event) { 
-			var db = event.target.result;
-			
-			// Create an objectStore for this database
-			this._objectStore = db.createObjectStore(this.options.treestore, { keyPath: "name" });
-			
-			this._objectStore.add({
-				name: 'root',
-				children: []
-			});
+		this._request.onupgradeneeded = this._upgrade;
+		this._request.onsuccess = this._opened;
+		this._request.onerror = this._opened;
+	},
+	
+	_opened: function(event) {
+		this._db = event.target.result;
+		
+		this.fireEvent('open');
+	},
+	
+	_error: function(event) {
+		this.fireEvent('error', [event]);
+	},
+	
+	_upgrade: function(event) {
+		var db = event.target.result;
+		
+		var noteStore = db.createObjectStore(this.options.notestore, { keyPath: "id", autoIncrement: true });
+	},
+	
+	getTree: function(callback) {
+		if (!this._db) return;
+		
+		var tree = {};
+		var treeFlat = {};
+		
+		var trx = this._db.transaction(this.options.notestore);
+		var store = trx.objectStore(this.options.notestore);
+		var cursor = store.openCursor();
+		
+		cursor.onerror = this._error;
+		cursor.onsuccess = function(event) {
+			var cursor = event.target.result;
+
+			if (cursor) {
+				// Create own object
+				var o = treeFlat[cursor.key] || {};
+				o[name] = cursor.value.name;
+				
+				treeFlat[cursor.key] = o;
+				
+				// Create/add to parent object
+				if (cursor.value.parent) {
+					treeFlat[cursor.value.parent] = treeFlat[cursor.value.parent] || {};
+					var parent = treeFlat[cursor.value.parent];
+					if (!parent.items) {
+						parent.items = [
+							o
+						];
+					}
+				} else {
+					// No parent? Add to top level
+					tree[cursor.key] = o;
+				}
+				
+				cursor.continue();
+			} else {
+				if (callback && typeOf(callback) === 'function') callback(tree);
+			}
 		};
 	},
 	
-	retrieve: function(callback) {
-		if (!this._request) return; // TODO Report error better
+	addNote: function(name, parentID, callback) {
+		if (!this._db) return;
 		
-		/*this._dbcon.getCursor(this.options.name, function(ixDbCursorReq) {
-			if (!ixDbCursorReq) return;
-			
-			ixDbCursorReq.onsuccess = function(e) {
-				var result = ixDbCursorReq.result || e.result;
-				
-				if (!result) {
-					result = {
-						id: 'root',
-						childnodes: []
-					};
-					
-					this.store(result);
-				}
-				
-				if (typeOf(callback) === 'function') callback(result);
-			}.bind(this);
-		}.bind(this), undefined, IDBKeyRange.only("root"), true, "ixPathField");*/
+		var trx = this._db.transaction(this.options.notestore);
+		var store = trx.objectStore(this.options.notestore);
+		
+		var request = store.add({
+			name: name,
+			parent: parentID || undefined,
+			content: ''
+		});
+		
+		request.onerror = this._error;
+		request.onsuccess = function(event) {
+			if (callback && typeOf(callback) === 'function') callback(event.target.result);
+		}.bind(this);
 	},
 	
-	store: function(obj) {
-		this._dbcon.add(this.options.name, obj);
+	deleteNote: function(noteID, callback) {
+		if (!this._db) return;
 		
+		var trx = this._db.transaction(this.options.notestore);
+		var store = trx.objectStore(this.options.notestore);
+		
+		var request = store.delete(noteID);
+		
+		request.onerror = this._error;
+		request.onsuccess = function(event) {
+			if (callback && typeOf(callback) === 'function') callback(event.target.result);
+		}.bind(this);
+	},
+	
+	getContent: function(key, callback) {
+		if (!this._db) return;
+		
+		var trx = this._db.transaction(this.options.notestore);
+		var store = trx.objectStore(this.options.notestore);
+		var request = store.get(key);
+		
+		request.onerror = this._error;
+		request.onsuccess = function(event) {
+			if (callback && typeOf(callback) === 'function') callback(event.target.result);
+		};
+	},
+	
+	saveContent: function(noteID, content, callback) {
+		if (!this._db) return;
+		
+		var trx = this._db.transaction(this.options.notestore);
+		var store = trx.objectStore(this.options.notestore);
+		
+		var request = store.get(noteID);
+		
+		request.onerror = this._error;
+		request.onsuccess = function(event) {
+			var note = event.target.result;
+			note.content = content;
+			
+			var r2 = store.put(note);
+			
+			r2.onerror = this.error;
+			r2.onsuccess = callback;
+		}.bind(this);
 	}
-
 });
