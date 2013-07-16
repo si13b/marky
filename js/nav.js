@@ -11,16 +11,18 @@ marky.nav = new Class({
 	element: null,
 	_elList: null,
 	_elOpts: null,
+	_db: null,
 
-	initialize: function(options) {
+	initialize: function(options, db) {
 		this.setOptions(options);
 		
+		this._db = db;
 		this.element = $$('.nav');
 		
-		this.render();
+		this._db.retrieve(this.render)
 	},
 	
-	render: function() {
+	render: function(root) {
 		this._elOpts = new Element('div', {
 			'class': 'opts'
 		}).adopt(
