@@ -2,55 +2,75 @@ marky.db = new Class({
 	Implements: [Options, Events],
 
 	Binds: [
+		'open',
 		'retrieve',
 		'store'
 	],
 
 	options: {
-		name: 'markyDB'
+		dbname: 'markyDB',
+		treestore: 'tree',
+		version: 1
 	},
 	
 	element: null,
-	_dbddl: null,
-	_dbcon: null,
+	_request: null,
+	_objectStore: null,
 
 	initialize: function(options) {
 		this.setOptions(options);
 		
-		this._dbddl = (
-			function() {
-				ixDbEz.createObjStore(this.options.name, "pathField", false);
-				ixDbEz.createIndex(this.options.name, "ixPathField", "pathField", true);
-			}.bind(this)
-		);
+		this.open();
+	},
+	
+	open: function() {
+		window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+		window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+		window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+
+		if (!window.indexedDB) return; // TODO Handle better
 		
-		this._dbcon = ixDbEz.startDB(this.options.name, 2, this._dbddl, undefined, undefined, false);
+		this._request = window.indexedDB.open(this.options.dbname, this.options.version);
 		
-		// TODO not supported -> if (!window.indexedDB) return;
+		this._request.onupgradeneeded = function(event) { 
+			var db = event.target.result;
+			
+			// Create an objectStore for this database
+			this._objectStore = db.createObjectStore(this.options.treestore, { keyPath: "name" });
+			
+			this._objectStore.add({
+				name: 'root',
+				children: []
+			});
+		};
 	},
 	
 	retrieve: function(callback) {
-		ixDbEz.getCursor(this.options.name, function(ixDbCursorReq) {
+		if (!this._request) return; // TODO Report error better
+		
+		/*this._dbcon.getCursor(this.options.name, function(ixDbCursorReq) {
 			if (!ixDbCursorReq) return;
 			
-			ixDbCursorReq.onsucess = function(e) {
+			ixDbCursorReq.onsuccess = function(e) {
 				var result = ixDbCursorReq.result || e.result;
 				
 				if (!result) {
 					result = {
-						path: 'root'
+						id: 'root',
+						childnodes: []
 					};
 					
 					this.store(result);
 				}
 				
 				if (typeOf(callback) === 'function') callback(result);
-			};
-		}, undefined, IDBKeyRange.only("root"), true, "ixPathField");
+			}.bind(this);
+		}.bind(this), undefined, IDBKeyRange.only("root"), true, "ixPathField");*/
 	},
 	
 	store: function(obj) {
-		ixDbEz.add(this.options.name, obj);
+		this._dbcon.add(this.options.name, obj);
+		
 	}
 
 });
