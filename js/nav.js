@@ -3,7 +3,8 @@ marky.nav = new Class({
 
 	Binds: [
 		'render',
-		'_addItem'
+		'_addItem',
+		'_clickItem'
 	],
 
 	options: {
@@ -50,15 +51,17 @@ marky.nav = new Class({
 		);
 		
 		this._elList = new Element('ul', {
-			
+			'events': {
+				'click:relay(li)': this._clickItem
+			}
 		});
 		
 		Object.each(tree, function(item, key) {
-			new Element('li', {
+			this._elList.grab(new Element('li', {
 				'class': (item.items ? 'folder' : undefined),
 				text: item.name,
 				'data-id': key
-			});
+			}));
 			
 			// TODO render child elements
 		}.bind(this));
@@ -70,13 +73,24 @@ marky.nav = new Class({
 		// TODO get parent ID of context
 		
 		this._db.addNote(this.options.defaultName, null, function(newID) {
-			this._elList.adopt(
+			this._elList.grab(
 				new Element('li', {
 					text: this.options.defaultName,
 					'data-id': newID
 				})
 			)
-		}).bind(this);
+		}.bind(this));
+	},
+	
+	_clickItem: function(event) {
+		var element = $(event.target);
+		
+		var elExisting = this.element.getElement('.selected');
+		if (elExisting && elExisting.removeClass) elExisting.removeClass('selected');
+		
+		// TODO Saving existing?
+		
+		element.addClass('selected');
 	}
 
 });

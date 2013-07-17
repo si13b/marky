@@ -15,14 +15,14 @@ marky.db = new Class({
 	options: {
 		dbname: 'markyDB',
 		notestore: 'note',
-		version: 1,
+		version: 3,
 		// onOpen: function() {}
 		// onError: function() {}
 	},
 	
 	element: null,
 	_request: null,
-	_db: null,
+	_idb: null,
 
 	initialize: function(options) {
 		this.setOptions(options);
@@ -41,11 +41,11 @@ marky.db = new Class({
 		
 		this._request.onupgradeneeded = this._upgrade;
 		this._request.onsuccess = this._opened;
-		this._request.onerror = this._opened;
+		this._request.onerror = this._error;
 	},
 	
 	_opened: function(event) {
-		this._db = event.target.result;
+		this._idb = event.target.result;
 		
 		this.fireEvent('open');
 	},
@@ -55,18 +55,18 @@ marky.db = new Class({
 	},
 	
 	_upgrade: function(event) {
-		var db = event.target.result;
+		var idb = event.target.result;
 		
-		var noteStore = db.createObjectStore(this.options.notestore, { keyPath: "id", autoIncrement: true });
+		var noteStore = idb.createObjectStore(this.options.notestore, { keyPath: "id", autoIncrement: true });
 	},
 	
 	getTree: function(callback) {
-		if (!this._db) return;
+		if (!this._idb) return;
 		
 		var tree = {};
 		var treeFlat = {};
 		
-		var trx = this._db.transaction(this.options.notestore);
+		var trx = this._idb.transaction(this.options.notestore);
 		var store = trx.objectStore(this.options.notestore);
 		var cursor = store.openCursor();
 		
@@ -77,7 +77,7 @@ marky.db = new Class({
 			if (cursor) {
 				// Create own object
 				var o = treeFlat[cursor.key] || {};
-				o[name] = cursor.value.name;
+				o.name = cursor.value.name;
 				
 				treeFlat[cursor.key] = o;
 				
@@ -103,9 +103,9 @@ marky.db = new Class({
 	},
 	
 	addNote: function(name, parentID, callback) {
-		if (!this._db) return;
+		if (!this._idb) return;
 		
-		var trx = this._db.transaction(this.options.notestore);
+		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
 		var store = trx.objectStore(this.options.notestore);
 		
 		var request = store.add({
@@ -121,9 +121,9 @@ marky.db = new Class({
 	},
 	
 	deleteNote: function(noteID, callback) {
-		if (!this._db) return;
+		if (!this._idb) return;
 		
-		var trx = this._db.transaction(this.options.notestore);
+		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
 		var store = trx.objectStore(this.options.notestore);
 		
 		var request = store.delete(noteID);
@@ -135,9 +135,9 @@ marky.db = new Class({
 	},
 	
 	getContent: function(key, callback) {
-		if (!this._db) return;
+		if (!this._idb) return;
 		
-		var trx = this._db.transaction(this.options.notestore);
+		var trx = this._idb.transaction(this.options.notestore);
 		var store = trx.objectStore(this.options.notestore);
 		var request = store.get(key);
 		
@@ -148,9 +148,9 @@ marky.db = new Class({
 	},
 	
 	saveContent: function(noteID, content, callback) {
-		if (!this._db) return;
+		if (!this._idb) return;
 		
-		var trx = this._db.transaction(this.options.notestore);
+		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
 		var store = trx.objectStore(this.options.notestore);
 		
 		var request = store.get(noteID);
