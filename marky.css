@@ -112,6 +112,11 @@ h1 {
 	padding: 4px 8px 8px 24px;
 }
 
+.main > .content > .nav > ul > li.selected {
+	background-color: #ddd;
+	color: black;
+}
+
 .main > .content > .nav > ul > li.folder:before {
 	border: 5px solid transparent;
 	border-left-color: #888;
@@ -136,8 +141,13 @@ h1 {
 }
 
 .main > .content > .editor > #aceeditor {
+	display: none;
 	font-size: 110%;
 	height: 100%;
+}
+
+.main > .content > .editor > #aceeditor.selected {
+	display: block;
 }
 
 .footer {

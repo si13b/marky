@@ -15,10 +15,12 @@ marky.nav = new Class({
 	_elList: null,
 	_elOpts: null,
 	_db: null,
+	_content: null,
 
-	initialize: function(options, db) {
+	initialize: function(options, content, db) {
 		this.setOptions(options);
 		
+		this._content = content;
 		this._db = db;
 		this.element = $$('.nav');
 		
@@ -88,7 +90,7 @@ marky.nav = new Class({
 		var elExisting = this.element.getElement('.selected');
 		if (elExisting && elExisting.removeClass) elExisting.removeClass('selected');
 		
-		// TODO Saving existing?
+		this._content.setSelected(element.get('data-id'));
 		
 		element.addClass('selected');
 	}

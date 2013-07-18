@@ -6,7 +6,7 @@ var marky = {};
 	
 		Binds: [
 			'render',
-			'_renderNav'
+			'_onDBOpen'
 		],
 	
 		options: {
@@ -15,6 +15,7 @@ var marky = {};
 		element: null,
 		_nav: null,
 		_db: null,
+		_content: null,
 	
 		initialize: function(options) {
 			this.setOptions(options);
@@ -23,18 +24,17 @@ var marky = {};
 		},
 		
 		render: function() {
-			var editor = ace.edit("aceeditor");
-			editor.setTheme("ace/theme/monokai");
-			editor.getSession().setMode("ace/mode/markdown");
+			
 			
 			this._db = new marky.db({
-				onOpen: this._renderNav
+				onOpen: this._onDBOpen
 			});
 			// TODO bottom tabs? Edit, Preview, Manage (icon)
 		},
 		
-		_renderNav: function() {
-			this._nav = new marky.nav({}, this._db);
+		_onDBOpen: function() {
+			this._content = new marky.content({}, this._db);
+			this._nav = new marky.nav({}, this._content, this._db);
 		}
 	
 	});

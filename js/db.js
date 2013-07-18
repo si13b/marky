@@ -126,7 +126,7 @@ marky.db = new Class({
 		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
 		var store = trx.objectStore(this.options.notestore);
 		
-		var request = store.delete(noteID);
+		var request = store.delete(Number(noteID));
 		
 		request.onerror = this._error;
 		request.onsuccess = function(event) {
@@ -139,11 +139,12 @@ marky.db = new Class({
 		
 		var trx = this._idb.transaction(this.options.notestore);
 		var store = trx.objectStore(this.options.notestore);
-		var request = store.get(key);
+		var request = store.get(Number(key));
 		
 		request.onerror = this._error;
 		request.onsuccess = function(event) {
-			if (callback && typeOf(callback) === 'function') callback(event.target.result);
+			var content = request.result.content;
+			if (callback && typeOf(callback) === 'function') callback(content);
 		};
 	},
 	
@@ -153,7 +154,7 @@ marky.db = new Class({
 		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
 		var store = trx.objectStore(this.options.notestore);
 		
-		var request = store.get(noteID);
+		var request = store.get(Number(noteID));
 		
 		request.onerror = this._error;
 		request.onsuccess = function(event) {
