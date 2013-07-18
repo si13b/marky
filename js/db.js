@@ -6,7 +6,7 @@ marky.db = new Class({
 		'_opened',
 		'_upgrade',
 		'getTree',
-		'getContent',
+		'getNote',
 		'addNote',
 		'deleteNote',
 		'saveContent'
@@ -134,7 +134,7 @@ marky.db = new Class({
 		}.bind(this);
 	},
 	
-	getContent: function(key, callback) {
+	getNote: function(key, callback) {
 		if (!this._idb) return;
 		
 		var trx = this._idb.transaction(this.options.notestore);
@@ -143,13 +143,15 @@ marky.db = new Class({
 		
 		request.onerror = this._error;
 		request.onsuccess = function(event) {
-			var content = request.result.content;
-			if (callback && typeOf(callback) === 'function') callback(content);
+			var note = request.result;
+			if (callback && typeOf(callback) === 'function') callback(note);
 		};
 	},
 	
 	saveContent: function(noteID, content, callback) {
 		if (!this._idb) return;
+		
+		// TODO Use getNote?
 		
 		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
 		var store = trx.objectStore(this.options.notestore);
@@ -160,6 +162,28 @@ marky.db = new Class({
 		request.onsuccess = function(event) {
 			var note = event.target.result;
 			note.content = content;
+			
+			var r2 = store.put(note);
+			
+			r2.onerror = this.error;
+			r2.onsuccess = callback;
+		}.bind(this);
+	},
+	
+	saveName: function(noteID, name, callback) {
+		if (!this._idb) return;
+		
+		// TODO Use getNote?
+		
+		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
+		var store = trx.objectStore(this.options.notestore);
+		
+		var request = store.get(Number(noteID));
+		
+		request.onerror = this._error;
+		request.onsuccess = function(event) {
+			var note = event.target.result;
+			note.name = name;
 			
 			var r2 = store.put(note);
 			

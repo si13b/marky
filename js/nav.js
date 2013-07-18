@@ -4,7 +4,10 @@ marky.nav = new Class({
 	Binds: [
 		'render',
 		'_addItem',
-		'_clickItem'
+		'_clickItem',
+		'_addFolder',
+		'_deleteItem',
+		'_changeName'
 	],
 
 	options: {
@@ -21,6 +24,8 @@ marky.nav = new Class({
 		this.setOptions(options);
 		
 		this._content = content;
+		this._content.addEvent('changeName', this._changeName);
+		
 		this._db = db;
 		this.element = $$('.nav');
 		
@@ -40,15 +45,17 @@ marky.nav = new Class({
 			}),
 			new Element('div', {
 				'html': '❐',
-				'title': 'Folder'
-			}),
-			new Element('div', {
-				'html': '⧎',
-				'title': 'Rename'
+				'title': 'Folder',
+				'events': {
+					'click': this._addFolder
+				}
 			}),
 			new Element('div', {
 				'html': '✕',
-				'title': 'Delete'
+				'title': 'Delete',
+				'events': {
+					'click': this._deleteItem
+				}
 			})
 		);
 		
@@ -93,6 +100,26 @@ marky.nav = new Class({
 		this._content.setSelected(element.get('data-id'));
 		
 		element.addClass('selected');
+	},
+	
+	_addFolder: function(event) {
+		
+	},
+	
+	_deleteItem: function(event) {
+		var selected = this._content.getSelected();
+		
+		if (!selected) return;
+		
+		this._db.deleteNote(selected, function(newID) {
+			var el = this._elList.getElement('li[data-id="' + selected + '"]');
+			if (el) el.destroy();
+		}.bind(this));
+	},
+	
+	_changeName: function(id, name) {
+		var el = this._elList.getElement('li[data-id="' + id + '"]');
+		el.set('html', name);
 	}
 
 });

@@ -6,6 +6,10 @@
 body {
 	background-color: #FFbb88;
 	overflow: hidden;
+}
+
+body,
+input {
 	font-family: 'Open Sans', sans-serif;
 	font-size: 12pt;
 }
@@ -140,13 +144,38 @@ h1 {
 	bottom: 0;
 }
 
+.main > .content > .editor > .title {
+	color: #888;
+	display: none;
+	font-size: 200%;
+	height: 10%; /* Lame! Need a better approach */
+}
+
+.main > .content > .editor > .title > input {
+	background: none;
+	border: none;
+	color: #888;
+	font-size: 120%;
+	width: 100%;
+}
+
+.main > .content > .editor.selected > .title {
+	display: block;
+}
+
+.main > .content > .editor:not(.selected) > .title:after {
+	content: 'Select or create a note and start editing!';
+	color: #888;
+	display: block;
+}
+
 .main > .content > .editor > #aceeditor {
 	display: none;
 	font-size: 110%;
-	height: 100%;
+	height: 90%;
 }
 
-.main > .content > .editor > #aceeditor.selected {
+.main > .content > .editor.selected > #aceeditor {
 	display: block;
 }
 
