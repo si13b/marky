@@ -35,9 +35,10 @@ marky.content = new Class({
 		this._elAce = $$('#aceeditor');
 		
 		this._ace = ace.edit("aceeditor");
-		this._ace.setTheme("ace/theme/monokai");
+		this._ace.setTheme("ace/theme/twilight");
 		this._ace.setShowPrintMargin(false);
 		this._ace.getSession().setMode("ace/mode/markdown");
+		this._ace.getSession().setUseWrapMode(true);
 	},
 	
 	deselect: function() {
@@ -59,6 +60,8 @@ marky.content = new Class({
 		this._db.getNote(id, function(note) {
 			this._note = note;
 			this._ace.setValue(note.content || '');
+			this._ace.moveCursorTo(0, 0);
+			this._ace.focus();
 			this._elTitleInput.set('value', note.name);
 			this.element.addClass('selected');
 		}.bind(this));

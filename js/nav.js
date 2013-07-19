@@ -27,7 +27,7 @@ marky.nav = new Class({
 		this._content.addEvent('changeName', this._changeName);
 		
 		this._db = db;
-		this.element = $$('.nav');
+		this.element = $$('nav');
 		
 		this._db.getTree(this.render)
 	},
