@@ -49,13 +49,6 @@ marky.nav = new Class({
 				'events': {
 					'click': this._addFolder
 				}
-			}),
-			new Element('div', {
-				'html': '✕',
-				'title': 'Delete',
-				'events': {
-					'click': this._deleteItem
-				}
 			})
 		);
 		

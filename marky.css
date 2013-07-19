@@ -18,7 +18,7 @@ input {
 nav {
 	background-color: #444;
 	-moz-box-sizing: border-box;
-	border-right: 1pt solid #999;
+	border-right: 1pt solid black;
 	box-sizing: border-box;
 	position: absolute;
 	left: 0;
@@ -28,7 +28,7 @@ nav {
 }
 
 nav > h1 {
-	background-color: #777;
+	background-color: #333;
 	border-bottom: 1pt solid black;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
@@ -37,7 +37,7 @@ nav > h1 {
 	font-size: 200%;
 	font-weight: normal;
 	text-align: center;
-	text-shadow: 2px 2px 0 #999;
+	text-shadow: 2px 2px 0 #444;
 	padding: 0;
 	line-height: 60px;
 	margin: 0;
@@ -45,11 +45,17 @@ nav > h1 {
 }
 
 nav > .opts {
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 	text-align: center;
 	border-bottom: 1pt dotted #ccc;
+	height: 50px;
+	line-height: 50px;
 }
 
 nav > .opts > div {
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 	display: inline-block;
 	color: #888;
 	cursor: pointer;
@@ -57,7 +63,7 @@ nav > .opts > div {
 	font-size: 200%;
 	margin: 0;
 	padding: 0;
-	width: 60px;
+	width: 52px;
 	text-align: center;
 	text-shadow: 2px 2px 0 #444;
 }
@@ -100,6 +106,7 @@ nav > ul > li:hover {
 }
 
 .editor {
+	display: none;
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -107,12 +114,15 @@ nav > ul > li:hover {
 	left: 260px;
 }
 
+.editor.selected {
+	display: block;
+}
+
 .editor > .title {
-	background-color: #888;
-	border-bottom: 1pt solid black;
+	background-color: #ddd;
+	border-bottom: 1pt solid #888;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
-	display: none;
 	font-size: 200%;
 	height: 60px;
 	padding: 0 16px;
@@ -121,7 +131,7 @@ nav > ul > li:hover {
 .editor > .title > input {
 	background: none;
 	border: none;
-	color: #ccc;
+	color: #999;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	font-size: 120%;
@@ -129,14 +139,38 @@ nav > ul > li:hover {
 	height: 60px;
 }
 
-.editor.selected > .title {
-	display: block;
-}
 
 .editor:not(.selected) > .title:after {
 	content: 'Select or create a note and start editing!';
 	color: #888;
 	display: block;
+}
+
+.editor > .toolbar {
+	border-bottom: 1pt dotted #ccc;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 0 0 0 8px;
+	height: 50px;
+	line-height: 50px;
+	text-align: left;
+}
+
+.editor > .toolbar > div {
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	display: inline-block;
+	color: #888;
+	cursor: pointer;
+	font-size: 200%;
+	margin: 0;
+	padding: 0;
+	width: 52px;
+	text-align: center;
+}
+
+.editor > .toolbar > div:hover {
+	background-color: #ddd;
 }
 
 .editor > #aceeditor {
@@ -147,4 +181,17 @@ nav > ul > li:hover {
 
 .editor.selected > #aceeditor {
 	display: block;
+}
+
+.msg {
+	background-color: #eee;
+	border: 1px solid black;
+	color: #444;
+	font-size: 110%;
+	padding: 4px;
+	position: absolute;
+	top: 0;
+	left: 50%;
+	text-align: center;
+	z-index: 1;
 }
