@@ -7,11 +7,16 @@ marky.content = new Class({
 		'deselect',
 		'setSelected',
 		'getSelected',
-		'_changeName'
+		'_toggleMenu',
+		'_changeName',
+		'_delete',
+		'_archive',
+		'_addChild'
 	],
 
 	options: {
 		//onName
+		//onDelete
 	},
 	
 	element: null,
@@ -50,20 +55,40 @@ marky.content = new Class({
 		
 		// TODO
 		this._elToolbar.grab(new Element('div', {
-			'html': '★',
+			'html': '✔',
 			'title': 'Save',
 			'events': {
 				'click': this.save
 			}
 		}));
-		/* TODO Put in sub menu
-		 *this._elToolbar.grab(new Element('div', {
-			'html': '✕',
-			'title': 'Delete',
+		this._elToolbar.grab(new Element('div', {
+			'html': '✚',
+			'title': 'Add child note',
 			'events': {
-				'click': this._deleteItem
+				'click': this._addChild
 			}
-		}));*/
+		}));
+		
+		this._elToolbar.grab(new Element('div', {
+			'class': 'manage'
+		}).adopt(
+			new Element('div', {
+				'html': '⛁',
+				'title': 'Archive',
+				'events': {
+					'click': this._archive
+				}
+			}),
+			new Element('div', {
+				'html': '✕',
+				'title': 'Delete',
+				'events': {
+					'click': this._delete
+				}
+			})
+		));
+		
+		// TODO Undo
 	},
 	
 	save: function() {
@@ -73,12 +98,23 @@ marky.content = new Class({
 		}.bind(this));
 	},
 	
+	_delete: function(event) {
+		if (!this._selected) return;
+		
+		this._db.deleteNote(this._selected, function(newID) {
+			//var el = this._elList.getElement('li[data-id="' + this._selected + '"]');
+			//if (el) el.destroy();
+			this.fireEvent('delete', this._selected);
+			this.deselect();
+		}.bind(this));
+	},
+	
 	deselect: function() {
 		this._note = null;
 		this._selected = null
 		this.element.removeClass('selected');
 		this._ace.setValue('');
-		this._elTitle.set('html', '');
+		this._elTitleInput.set('value', '');
 	},
 	
 	setSelected: function(id) {
@@ -112,6 +148,13 @@ marky.content = new Class({
 		this._db.saveName(this._selected, title, function() {
 			this.fireEvent('changeName', [this._selected, title]);
 		}.bind(this));
+	},
+	
+	_archive: function(event) {
+		
+	},
+	
+	_addChild: function(event) {
+		
 	}
-
 });

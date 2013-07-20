@@ -4,8 +4,9 @@ marky.nav = new Class({
 	Binds: [
 		'render',
 		'_addItem',
+		'_download',
 		'_clickItem',
-		'_addFolder',
+		'_addChild',
 		'_deleteItem',
 		'_changeName'
 	],
@@ -25,6 +26,7 @@ marky.nav = new Class({
 		
 		this._content = content;
 		this._content.addEvent('changeName', this._changeName);
+		this._content.addEvent('delete', this._deleteItem);
 		
 		this._db = db;
 		this.element = $$('nav');
@@ -37,17 +39,17 @@ marky.nav = new Class({
 			'class': 'opts'
 		}).adopt(
 			new Element('div', {
-				'html': '+',
+				'html': '✚',
 				'title': 'New',
 				'events': {
 					'click': this._addItem
 				}
 			}),
 			new Element('div', {
-				'html': '❐',
-				'title': 'Folder',
+				'html': '⇲',
+				'title': 'Download data',
 				'events': {
-					'click': this._addFolder
+					'click': this._download
 				}
 			})
 		);
@@ -69,6 +71,16 @@ marky.nav = new Class({
 		}.bind(this));
 		
 		this.element.adopt(this._elOpts, this._elList);
+	},
+	
+	_download: function() {
+		this._db.dump(function(content) {
+			var url = 'data:text/plain,' + encodeURI(JSON.encode(content));
+			new marky.msg({
+				timeout: 10000,
+				buttons: ['close']
+			}).show('<a href="' + url + '">Click here to download content</a>');
+		});
 	},
 	
 	_addItem: function() {
@@ -95,19 +107,15 @@ marky.nav = new Class({
 		element.addClass('selected');
 	},
 	
-	_addFolder: function(event) {
+	_addChild: function(event) {
 		
 	},
 	
-	_deleteItem: function(event) {
-		var selected = this._content.getSelected();
+	_deleteItem: function(item) {
+		if (!item) return;
 		
-		if (!selected) return;
-		
-		this._db.deleteNote(selected, function(newID) {
-			var el = this._elList.getElement('li[data-id="' + selected + '"]');
-			if (el) el.destroy();
-		}.bind(this));
+		var el = this._elList.getElement('li[data-id="' + item + '"]');
+		if (el) el.destroy();
 	},
 	
 	_changeName: function(id, name) {

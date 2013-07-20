@@ -7,7 +7,8 @@ marky.msg = new Class({
 	],
 
 	options: {
-		timeout: 1000
+		timeout: 1000,
+		buttons: ['ok']
 	},
 	
 	element: null,
@@ -25,12 +26,31 @@ marky.msg = new Class({
 			})
 		);
 		
-		this.element.grab(new Element('button', {
-			'text': 'OK',
-			'events': {
-				'click': this.hide
-			}
-		}));
+		var elButtons = new Element('div', {
+			'class': 'buttons'
+		});
+		
+		if (this.options.buttons) {
+			this.options.buttons.forEach(function(item, index) {
+				if (item === 'ok') {
+					elButtons.grab(new Element('button', {
+							'text': 'OK',
+						'events': {
+							'click': this.hide
+						}
+					}));
+				} else if (item === 'close') {
+					elButtons.grab(new Element('button', {
+							'text': 'Close',
+						'events': {
+							'click': this.hide
+						}
+					}));
+				}
+			}.bind(this))
+		}
+		
+		this.element.grab(elButtons);
 		
 		document.body.grab(this.element);
 		

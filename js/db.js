@@ -6,6 +6,7 @@ marky.db = new Class({
 		'_opened',
 		'_upgrade',
 		'getTree',
+		'dump',
 		'getNote',
 		'addNote',
 		'deleteNote',
@@ -98,6 +99,29 @@ marky.db = new Class({
 				cursor.continue();
 			} else {
 				if (callback && typeOf(callback) === 'function') callback(tree);
+			}
+		};
+	},
+	
+	dump: function(callback) {
+		if (!this._idb) return;
+		
+		var data = [];
+		
+		var trx = this._idb.transaction(this.options.notestore);
+		var store = trx.objectStore(this.options.notestore);
+		var cursor = store.openCursor();
+		
+		cursor.onerror = this._error;
+		cursor.onsuccess = function(event) {
+			var cursor = event.target.result;
+
+			if (cursor) {
+				data.push(cursor.value);
+				
+				cursor.continue();
+			} else {
+				if (callback && typeOf(callback) === 'function') callback(data);
 			}
 		};
 	},
