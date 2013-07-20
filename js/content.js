@@ -61,13 +61,13 @@ marky.content = new Class({
 				'click': this.save
 			}
 		}));
-		this._elToolbar.grab(new Element('div', {
+		/*this._elToolbar.grab(new Element('div', {
 			'html': '✚',
 			'title': 'Add child note',
 			'events': {
 				'click': this._addChild
 			}
-		}));
+		}));*/
 		
 		this._elToolbar.grab(new Element('div', {
 			'class': 'manage'
