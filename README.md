@@ -1,4 +1,7 @@
 marky
 =====
+A simple web-based note taking app that combines:
+* Markdown
+* Ace editor
+* IndexedDB
 
-A web-based hierarchial note taker that utilises the markdown language and ace editor.
