@@ -47,7 +47,7 @@ nav > h1 {
 	font-size: 200%;
 	font-weight: normal;
 	text-align: center;
-	text-shadow: 2px 2px 0 #204a87;
+	text-shadow: 2px 2px 0 #222;
 	padding: 0;
 	line-height: 60px;
 	margin: 0;
@@ -59,8 +59,8 @@ nav > .opts {
 	box-sizing: border-box;
 	text-align: center;
 	border-bottom: 1pt dotted #333;
-	height: 50px;
-	line-height: 50px;
+	height: 42px;
+	line-height: 42px;
 }
 
 nav > .opts > div {
@@ -69,12 +69,11 @@ nav > .opts > div {
 	display: inline-block;
 	color: #888;
 	cursor: pointer;
-	font-size: 200%;
+	font-size: 150%;
 	margin: 0;
 	padding: 0;
-	width: 52px;
+	width: 42px;
 	text-align: center;
-	text-shadow: 2px 2px 0 #444;
 }
 
 nav > .opts > div:hover {
@@ -82,6 +81,7 @@ nav > .opts > div:hover {
 }
 
 nav > ul {
+	font-size: 90%;
 	position: absolute;
 	left: 0;
 	right: 0;
@@ -92,32 +92,193 @@ nav > ul {
 	padding: 0;
 }
 
-nav > ul > li {
+nav ul > li {
 	color: #ddd;
 	cursor: pointer;
-	font-size: 90%;
 	list-style-type: none;
 	margin: 0;
-	padding: 4px 8px 8px 24px;
+	padding: 8px;
+	position: relative;
 }
 
-nav > ul > li.selected {
+nav ul > li > i {
+	margin: 0 4px 0 0;
+	vertical-align: middle;
+}
+
+nav ul > li.selected {
 	background-color: #ddd;
 	color: black;
 }
 
-nav > ul > li.folder:before {
-	border: 5px solid transparent;
-	border-left-color: #888;
-	content: ' ';
-	width: 0;
-	height: 0;
-	position: absolute;
-	margin: 7px 0 0 -16px;
+nav ul > li:hover:not(.folder) {
+	background-color: #888;
 }
 
-nav > ul > li:hover {
+nav ul > li.folder {
+	
+}
+
+nav ul > li.folder > .setting {
+	color: #aaa;
+	display: none;
+	position: absolute;
+	right: 4px;
+	top: 0;
+	height: 32px;
+	line-height: 32px;
+	text-align: center;
+	width: 32px;
+}
+
+nav ul > li.folder > .setting.active {
+	color: white;
+	text-shadow: 0 0 2px white;
+}
+
+nav ul > li.folder > .setting:hover {
 	background-color: #888;
+}
+
+nav ul > li.folder.expanded > .setting {
+	display: block;
+}
+
+nav ul > li.folder > .setting > i {
+	
+}
+
+nav ul > li.folder.expanded {
+	background-color: #555;
+}
+
+nav ul > li.folder.expanded > i {
+	color: white;
+}
+
+nav ul > li.folder > ul {
+	border-left: 4px solid #ccc;
+	display: none;
+	margin: 8px 0 0 2px;
+	padding: 0;
+}
+
+nav ul > li.folder.expanded > ul {
+	display: block;
+}
+
+nav ul > li.folder.gray > span,
+nav ul > li.folder.gray > i,
+nav ul > li.folder.gray > ul {
+	border-left-color: #ccc;
+	color: #ccc;
+}
+
+nav ul > li.folder.yellow > span,
+nav ul > li.folder.yellow > i,
+nav ul > li.folder.yellow > ul {
+	border-left-color: #edd400;
+	color: #edd400;
+}
+
+nav ul > li.folder.green > span,
+nav ul > li.folder.green > i,
+nav ul > li.folder.green > ul {
+	border-left-color: #73d216;
+	color: #73d216;
+}
+
+nav ul > li.folder.orange > span,
+nav ul > li.folder.orange > i,
+nav ul > li.folder.orange > ul {
+	border-left-color: #f57900;
+	color: #f57900;
+}
+
+nav ul > li.folder.blue > span,
+nav ul > li.folder.blue > i,
+nav ul > li.folder.blue > ul {
+	border-left-color: #729fcf;
+	color: #729fcf;
+}
+
+nav ul > li.folder.purple > span,
+nav ul > li.folder.purple > i,
+nav ul > li.folder.purple > ul {
+	border-left-color: #ad7fa8;
+	color: #ad7fa8;
+}
+
+nav ul > li.folder.brown > span,
+nav ul > li.folder.brown > i,
+nav ul > li.folder.brown > ul {
+	border-left-color: #c17d11;
+	color: #c17d11;
+}
+
+nav ul > li.folder.red > span,
+nav ul > li.folder.red > i,
+nav ul > li.folder.red > ul {
+	border-left-color: #ef2929;
+	color: #ef2929;
+}
+
+nav ul > li.folder > .settings {
+	border-bottom: 1px dotted #ccc;
+	border-top: 1px dotted #ccc;
+	display: none;
+	padding: 8px 0;
+}
+
+nav ul > li.folder.expanded > .settings.shown {
+	display: block;
+}
+
+nav ul > li.folder > .settings > .colours {
+	margin: 4px 0;
+	text-align: center;
+}
+
+nav ul > li.folder > .settings > .colours > .colour {
+	cursor: pointer;
+	display: inline-block;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	line-height: 32px;
+	width: 32px;
+	height: 32px;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.gray {
+	background-color: #ccc;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.yellow {
+	background-color: #edd400;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.green {
+	background-color: #73d216;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.orange {
+	background-color: #f57900;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.blue {
+	background-color: #729fcf;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.purple {
+	background-color: #ad7fa8;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.brown {
+	background-color: #c17d11;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.red {
+	background-color: #ef2929;
 }
 
 .editor {
@@ -167,8 +328,8 @@ nav > ul > li:hover {
 	box-sizing: border-box;
 	padding: 0 0 0 8px;
 	position: relative;
-	height: 50px;
-	line-height: 50px;
+	height: 42px;
+	line-height: 42px;
 	text-align: left;
 }
 
@@ -179,10 +340,10 @@ nav > ul > li:hover {
 	display: inline-block;
 	color: #888;
 	cursor: pointer;
-	font-size: 200%;
+	font-size: 150%;
 	margin: 0;
 	padding: 0;
-	width: 52px;
+	width: 42px;
 	text-align: center;
 }
 
@@ -210,6 +371,8 @@ nav > ul > li:hover {
 .msg {
 	background-color: #eee;
 	border-radius: 0 0 4px 4px;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 	box-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
 	color: #888;
 	font-size: 120%;
@@ -219,4 +382,57 @@ nav > ul > li:hover {
 	left: 50%;
 	text-align: center;
 	z-index: 1;
+}
+
+.panel {
+	background-color: #444;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	color: #ddd;
+	font-size: 90%;
+	margin: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 101;
+}
+
+.panel > ul {
+	margin: 0;
+	padding: 0;
+}
+
+.panel > ul > li {
+	cursor: pointer;
+	list-style-type: none;
+	margin: 0;
+	padding: 8px;
+}
+
+.panel > ul > li:hover {
+	background-color: #888;
+}
+
+
+.overlay {
+     position: absolute;
+     left: 0px;
+     top: 0px;
+     width: 100%;
+     height: 100%;
+     z-index: 100;
+}
+
+.blank {
+	background-color: black;
+	color: #666;
+	font-size: 200%;
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 260px;
+	text-align: center;
+	padding: 32px;
+	z-index: -1;
 }

@@ -4,6 +4,8 @@ marky.content = new Class({
 	Binds: [
 		'_render',
 		'save',
+		'_showFolders',
+		'_selectFolder',
 		'deselect',
 		'setSelected',
 		'getSelected',
@@ -17,6 +19,7 @@ marky.content = new Class({
 	options: {
 		//onName
 		//onDelete
+		//onMove
 	},
 	
 	element: null,
@@ -28,6 +31,7 @@ marky.content = new Class({
 	_selected: null,
 	_db: null,
 	_note: null,
+	_elPanel: null,
 
 	initialize: function(options, db) {
 		this.setOptions(options);
@@ -52,40 +56,41 @@ marky.content = new Class({
 		this._ace.setShowPrintMargin(false);
 		this._ace.getSession().setMode("ace/mode/markdown");
 		this._ace.getSession().setUseWrapMode(true);
+		this._ace.commands.addCommand({
+			name: 'save',
+			bindKey: {win: 'Ctrl-S', mac: 'Command-S'},
+			exec: this.save
+		});
 		
-		// TODO
 		this._elToolbar.grab(new Element('div', {
-			'html': '✔',
 			'title': 'Save',
 			'events': {
 				'click': this.save
 			}
-		}));
-		/*this._elToolbar.grab(new Element('div', {
-			'html': '✚',
-			'title': 'Add child note',
+		}).grab(new Element('i', {'class': 'foundicon-checkmark'})));
+		
+		this._elToolbar.grab(new Element('div', {
+			'title': 'Move to',
 			'events': {
-				'click': this._addChild
+				'click': this._showFolders
 			}
-		}));*/
+		}).grab(new Element('i', {'class': 'foundicon-folder'})));
 		
 		this._elToolbar.grab(new Element('div', {
 			'class': 'manage'
 		}).adopt(
 			new Element('div', {
-				'html': '⛁',
 				'title': 'Archive',
 				'events': {
 					'click': this._archive
 				}
-			}),
+			}).grab(new Element('i', {'class': 'foundicon-mail'})),
 			new Element('div', {
-				'html': '✕',
 				'title': 'Delete',
 				'events': {
 					'click': this._delete
 				}
-			})
+			}).grab(new Element('i', {'class': 'foundicon-trash'}))
 		));
 		
 		// TODO Undo
@@ -95,6 +100,51 @@ marky.content = new Class({
 		this._db.saveContent(this._selected, this._ace.getValue(), function() {
 			console.log('Successfully saved');
 			new marky.msg({}).show('Successfully saved');
+		}.bind(this));
+	},
+	
+	_showFolders: function(event) {
+		var element = $(event.target);
+		
+		if (element.get('tag') !== 'div') element = element.getParent('div');
+		
+		this._db.getFolders(function(folders) {
+			this._elPanel = new marky.panel({});
+			
+			var elList = new Element('ul', {
+				'events': {
+					'click:relay(li)': this._selectFolder
+				}
+			});
+			
+			elList.grab(new Element('li', {
+				'html': 'None',
+			}));
+			
+			Object.each(folders, function(item) {
+				elList.grab(new Element('li', {
+					'data-id': item.id,
+					'html': item.name
+				}));
+			}.bind(this));
+			
+			this._elPanel.toElement().grab(elList);
+			this._elPanel.show({
+				relativeTo: element,
+				position: 'bottomLeft'
+			});
+		}.bind(this));
+	},
+	
+	_selectFolder: function(event) {
+		var element = $(event.target);
+		
+		var moveTo = element.get('data-id');
+		
+		this._elPanel.close();
+		
+		this._db.move(this._selected, moveTo, function() {
+			this.fireEvent('move', [this._selected, moveTo]);
 		}.bind(this));
 	},
 	

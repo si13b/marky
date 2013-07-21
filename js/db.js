@@ -7,10 +7,15 @@ marky.db = new Class({
 		'_upgrade',
 		'getTree',
 		'dump',
+		'getFolders',
 		'getNote',
 		'addNote',
+		'addFolder',
 		'deleteNote',
-		'saveContent'
+		'saveColour',
+		'saveContent',
+		'saveName',
+		'move'
 	],
 
 	options: {
@@ -78,7 +83,11 @@ marky.db = new Class({
 			if (cursor) {
 				// Create own object
 				var o = treeFlat[cursor.key] || {};
+				
+				// TODO Could just merge in whole IDB object?
 				o.name = cursor.value.name;
+				o.colour = cursor.value.colour;
+				if (cursor.value.folder) o.folder = cursor.value.folder;
 				
 				treeFlat[cursor.key] = o;
 				
@@ -87,10 +96,10 @@ marky.db = new Class({
 					treeFlat[cursor.value.parent] = treeFlat[cursor.value.parent] || {};
 					var parent = treeFlat[cursor.value.parent];
 					if (!parent.items) {
-						parent.items = [
-							o
-						];
+						parent.items = {};
 					}
+					
+					parent.items[cursor.key] = o;
 				} else {
 					// No parent? Add to top level
 					tree[cursor.key] = o;
@@ -126,6 +135,31 @@ marky.db = new Class({
 		};
 	},
 	
+	getFolders: function(callback) {
+		if (!this._idb) return;
+		
+		var data = [];
+		
+		var trx = this._idb.transaction(this.options.notestore);
+		var store = trx.objectStore(this.options.notestore);
+		var cursor = store.openCursor();
+		
+		cursor.onerror = this._error;
+		cursor.onsuccess = function(event) {
+			var cursor = event.target.result;
+
+			if (cursor) {
+				if (cursor.value.folder) {
+					data.push(cursor.value);
+				}
+				
+				cursor.continue();
+			} else {
+				if (callback && typeOf(callback) === 'function') callback(data);
+			}
+		};
+	},
+	
 	addNote: function(name, parentID, callback) {
 		if (!this._idb) return;
 		
@@ -136,6 +170,24 @@ marky.db = new Class({
 			name: name,
 			parent: parentID || undefined,
 			content: ''
+		});
+		
+		request.onerror = this._error;
+		request.onsuccess = function(event) {
+			if (callback && typeOf(callback) === 'function') callback(event.target.result);
+		}.bind(this);
+	},
+	
+	addFolder: function(name, parentID, callback) {
+		if (!this._idb) return;
+		
+		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
+		var store = trx.objectStore(this.options.notestore);
+		
+		var request = store.add({
+			name: name,
+			parent: parentID || undefined,
+			folder: true
 		});
 		
 		request.onerror = this._error;
@@ -208,6 +260,50 @@ marky.db = new Class({
 		request.onsuccess = function(event) {
 			var note = event.target.result;
 			note.name = name;
+			
+			var r2 = store.put(note);
+			
+			r2.onerror = this.error;
+			r2.onsuccess = callback;
+		}.bind(this);
+	},
+	
+	saveColour: function(noteID, colour, callback) {
+		if (!this._idb) return;
+		
+		// TODO Use getNote?
+		
+		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
+		var store = trx.objectStore(this.options.notestore);
+		
+		var request = store.get(Number(noteID));
+		
+		request.onerror = this._error;
+		request.onsuccess = function(event) {
+			var note = event.target.result;
+			note.colour = colour;
+			
+			var r2 = store.put(note);
+			
+			r2.onerror = this.error;
+			r2.onsuccess = callback;
+		}.bind(this);
+	},
+	
+	move: function(noteID, newParent, callback) {
+		if (!this._idb) return;
+		
+		// TODO Use getNote?
+		
+		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
+		var store = trx.objectStore(this.options.notestore);
+		
+		var request = store.get(Number(noteID));
+		
+		request.onerror = this._error;
+		request.onsuccess = function(event) {
+			var note = event.target.result;
+			note.parent = newParent;
 			
 			var r2 = store.put(note);
 			
