@@ -378,7 +378,11 @@ nav ul > li.folder > .settings > .colours > .colour.red {
 .editor > #aceeditor {
 	display: none;
 	font-size: 110%;
-	height: 100%;
+	position: absolute;
+	top: 102px;
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
 
 .editor.selected > #aceeditor {
