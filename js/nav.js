@@ -179,11 +179,13 @@ marky.nav = new Class({
 	
 	_download: function() {
 		this._db.dump(function(content) {
-			var url = 'data:text/plain,' + encodeURI(JSON.encode(content));
+			var blob = new Blob([JSON.encode(content)], {type: "text/plain"}); // pass a useful mime type here
+			var url = URL.createObjectURL(blob);
+			//var url = 'data:text/plain,' + encodeURI(JSON.encode(content));
 			new marky.msg({
 				timeout: 10000,
 				buttons: ['close']
-			}).show('<a href="' + url + '">Click here to download content</a>');
+			}).show('<a href="' + url + '" download>Click here to download content</a>');
 		});
 	},
 	
