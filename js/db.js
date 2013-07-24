@@ -5,6 +5,7 @@ marky.db = new Class({
 		'open',
 		'_opened',
 		'_upgrade',
+		'_error',
 		'getTree',
 		'dump',
 		'getFolders',
@@ -19,7 +20,7 @@ marky.db = new Class({
 	],
 
 	options: {
-		dbname: 'markyDB',
+		dbname: 'marky',
 		notestore: 'note',
 		version: 3,
 		// onOpen: function() {}
