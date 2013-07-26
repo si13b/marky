@@ -3,7 +3,13 @@
   
   even lighter; FFbb88*/
 
+html {
+	height: 100%;
+}
+
 body {
+	display: flex;
+	height: 100%;
 	margin: 0;
 	overflow: hidden;
 }
@@ -29,12 +35,11 @@ nav {
 	-moz-box-sizing: border-box;
 	border-right: 1pt dotted #222;
 	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
 	overflow: hidden;
-	position: absolute;
-	left: 0;
-	top: 0;
-	bottom: 0;
 	width: 260px;
+	height: 100%;
 }
 
 nav > h1 {
@@ -82,10 +87,7 @@ nav > .opts > div:hover {
 
 nav > ul {
 	font-size: 90%;
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 110px;
+	flex: 1;
 	bottom: 0;
 	overflow-y: auto;
 	margin: 8px 0 0;
@@ -300,15 +302,13 @@ nav ul > li.folder > .settings > .colours > .colour.red {
 
 .editor {
 	display: none;
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 260px;
+	flex: 1;
+	height: 100%;
 }
 
 .editor.selected {
-	display: block;
+	display: flex;
+	flex-direction: column;
 }
 
 .editor > .title {
@@ -378,11 +378,7 @@ nav ul > li.folder > .settings > .colours > .colour.red {
 .editor > #aceeditor {
 	display: none;
 	font-size: 110%;
-	position: absolute;
-	top: 102px;
-	bottom: 0;
-	left: 0;
-	right: 0;
+	flex: 1;
 }
 
 .editor.selected > #aceeditor {
