@@ -88,6 +88,10 @@ marky.nav = new Class({
 			elItem = new Element('li', {
 				'class': 'folder ' + item.colour,
 				'data-id': key
+			});
+			
+			var elAlpha = new Element('div', {
+				'class': 'alpha'
 			}).adopt(
 				new Element('i', {'class': 'foundicon-folder'}),
 				new Element('span', {
@@ -102,6 +106,14 @@ marky.nav = new Class({
 				}
 			}).grab(new Element('i', {'class': 'foundicon-settings'}));
 			
+			var elBeta = new Element('div', {
+				'class': 'beta'
+			}).grab(elSetting);
+			
+			var elMeta = new Element('div', {
+				'class': 'meta'
+			}).adopt(elAlpha, elBeta);
+			
 			var elTree = new Element('ul', {
 			});
 			
@@ -109,7 +121,7 @@ marky.nav = new Class({
 				this._renderItem(subItem, subKey, elTree);
 			}.bind(this));
 			
-			elItem.adopt(elSetting, this._renderSettings(item), elTree);
+			elItem.adopt(elMeta, this._renderSettings(item), elTree);
 		} else {
 			elItem = new Element('li', {
 				'html': item.name,
@@ -223,19 +235,13 @@ marky.nav = new Class({
 	
 	_addFolder: function(event) {
 		this._db.addFolder(this.options.defaultFolderName, null, function(newID) {
-			this._elList.grab(
-				new Element('li', {
-					'class': 'folder',
-					'data-id': newID
-				}).adopt(
-					new Element('i', {'class': 'foundicon-folder'}),
-					new Element('span', {
-						'html': this.options.defaultFolderName
-					}),
-					new Element('ul', {
-					})
-				)
-			)
+			var o = {
+				folder: true,
+				name: this.options.defaultFolderName,
+				items: []
+			};
+			
+			this._renderItem(o, newID, this._elList);
 		}.bind(this));
 	},
 	

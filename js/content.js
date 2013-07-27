@@ -62,22 +62,27 @@ marky.content = new Class({
 			exec: this.save
 		});
 		
-		this._elToolbar.grab(new Element('div', {
-			'title': 'Save',
-			'events': {
-				'click': this.save
-			}
-		}).grab(new Element('i', {'class': 'foundicon-checkmark'})));
+		this._elToolbar.grab(
+			new Element('div', {
+				'class': 'alpha'
+			}).adopt(
+				new Element('div', {
+					'title': 'Save',
+					'events': {
+						'click': this.save
+					}
+				}).grab(new Element('i', {'class': 'foundicon-checkmark'})),
+				new Element('div', {
+					'title': 'Move to',
+					'events': {
+						'click': this._showFolders
+					}
+				}).grab(new Element('i', {'class': 'foundicon-folder'}))
+			)
+		);
 		
 		this._elToolbar.grab(new Element('div', {
-			'title': 'Move to',
-			'events': {
-				'click': this._showFolders
-			}
-		}).grab(new Element('i', {'class': 'foundicon-folder'})));
-		
-		this._elToolbar.grab(new Element('div', {
-			'class': 'manage'
+			'class': 'beta'
 		}).adopt(
 			new Element('div', {
 				'title': 'Archive',
