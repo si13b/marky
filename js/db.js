@@ -8,6 +8,7 @@ marky.db = new Class({
 		'_error',
 		'getTree',
 		'dump',
+		'load',
 		'getFolders',
 		'getNote',
 		'addNote',
@@ -134,6 +135,36 @@ marky.db = new Class({
 				if (callback && typeOf(callback) === 'function') callback(data);
 			}
 		};
+	},
+	
+	load: function(data, callback) {
+		if (!this._idb || !data || !data.length) return;
+		
+		var trx = this._idb.transaction(this.options.notestore, 'readwrite');
+		var store = trx.objectStore(this.options.notestore);
+		var islooping = true,
+			runCount = 0,
+			callledback = false;
+		
+		data.each(function(item) {
+			var request = store.add(item); // Adding as is for now. Do filtered insert later on
+			runCount++;
+			
+			request.onerror = this._error;
+			request.onsuccess = function(event) {
+				runCount--;
+				if (!callledback && !islooping && runCount === 0 && callback && typeOf(callback) === 'function') {
+					callback();
+					callledback = true;
+				}
+			}.bind(this);
+		}.bind(this));
+		
+		islooping = false;
+		if (!callledback && runCount === 0 && callback && typeOf(callback) === 'function') {
+			callback();
+			callledback = true;
+		}
 	},
 	
 	getFolders: function(callback) {

@@ -8,14 +8,17 @@ marky.nav = new Class({
 		'_renderSettings',
 		'_addItem',
 		'_download',
+		'_upload',
 		'_clickItem',
 		'_addFolder',
 		'_deleteItem',
+		'_deleteFolder',
 		'_moveItem',
 		'_changeName',
 		'_changeColour',
 		'_onChangeName',
-		'_showSettings'
+		'_toggleArchive',
+		'_toggleUpload'
 	],
 
 	options: {
@@ -26,7 +29,9 @@ marky.nav = new Class({
 	
 	element: null,
 	_elList: null,
+	_elArchiveList: null,
 	_elOpts: null,
+	_elUpload: null,
 	_db: null,
 	_content: null,
 
@@ -65,8 +70,27 @@ marky.nav = new Class({
 				'events': {
 					'click': this._download
 				}
-			}).grab(new Element('i', {'class': 'foundicon-inbox'}))
+			}).grab(new Element('i', {'class': 'foundicon-inbox'})),
+			new Element('div', {
+				'title': 'Import data',
+				'events': {
+					'click': this._toggleUpload
+				}
+			}).grab(new Element('i', {'class': 'foundicon-up-arrow'}))
 		);
+		
+		this._elUpload = new Element('div', {
+			'class': 'upload'
+		});
+		
+		var elFile = new Element('input', {
+			'type': 'file',
+			'events': {
+				'change': this._upload
+			}
+		});
+		
+		this._elUpload.grab(elFile);
 		
 		this._elList = new Element('ul', {
 			'events': {
@@ -78,7 +102,25 @@ marky.nav = new Class({
 			this._renderItem(item, key, this._elList);
 		}.bind(this));
 		
-		this.element.adopt(this._elOpts, this._elList);
+		var elArchive = new Element('div', {
+			'class': 'archive'
+		});
+		
+		elArchive.grab(new Element('div', {
+			'class': 'title',
+			'html': '<i class="foundicon-inbox"></i>&nbsp;Archive',
+			'events': {
+				'click': this._toggleArchive
+			}
+		}));
+		
+		this._elArchiveList = new Element('ul', {});
+		
+		elArchive.grab(this._elArchiveList);
+		
+		// TODO Render out archive items
+		
+		this.element.adopt(this._elOpts, this._elUpload, this._elList, elArchive);
 	},
 	
 	_renderItem: function(item, key, elParent) {
@@ -169,9 +211,18 @@ marky.nav = new Class({
 			)
 		}.bind(this));
 		
+		var elDelete = new Element('button', {
+			'title': 'Delete',
+			'text': 'Delete',
+			'events': {
+				'click': this._deleteFolder
+			}
+		});
+		
 		elSettings.adopt(
 			elName,
-			elColours
+			elColours,
+			elDelete
 		);
 		
 		return elSettings;
@@ -187,6 +238,24 @@ marky.nav = new Class({
 				buttons: ['close']
 			}).show('<a href="' + url + '" download>Click here to download content</a>');
 		});
+	},
+	
+	_upload: function(event) {
+		var element = $(event.target);
+		
+		if (!element.files || !element.files.length) return;
+		
+		for (var i = 0; i < element.files.length; i++) {
+			var reader = new FileReader();
+		
+			reader.onload = function(fileEvent) {
+				var obj = JSON.decode(fileEvent.target.result);
+				if (!obj) return;
+				this._db.load(obj);
+			}.bind(this);
+		
+			reader.readAsText(element.files[i]);
+		}
 	},
 	
 	_addItem: function() {
@@ -246,6 +315,12 @@ marky.nav = new Class({
 		if (el) el.destroy();
 	},
 	
+	_deleteFolder: function(item) {
+		// TODO call db
+		// TODO Remove all child objects from folder
+		// TODO Remove folder display object itself
+	},
+	
 	_moveItem: function(item, moveTo) {
 		if (!item) return;
 		
@@ -285,6 +360,25 @@ marky.nav = new Class({
 	_onChangeName: function(id, name) {
 		var el = this._elList.getElement('li[data-id="' + id + '"]');
 		el.set('html', name);
+	},
+	
+	_toggleArchive: function(event) {
+		var element = $(event.target);
+		
+		// Ensure this is the element we want, and not a child capturing the event
+		if (!element.hasClass('archive')) element = element.getParent('.archive');
+		
+		element.toggleClass('open');
+	},
+	
+	_toggleUpload: function(event) {
+		var element = $(event.target);
+		
+		// Ensure this is the element we want, and not a child capturing the event
+		if (element.get('tag') !== 'div') element = element.getParent('div');
+		
+		element.toggleClass('open');
+		this._elUpload.toggleClass('open');
 	}
 
 });
