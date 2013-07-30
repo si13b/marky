@@ -136,40 +136,59 @@ nav ul > li.folder {
 	
 }
 
-nav ul > li.folder > .setting {
-	color: #aaa;
-	display: none;
-	position: absolute;
-	right: 4px;
-	top: 0;
-	height: 32px;
-	line-height: 32px;
-	text-align: center;
-	width: 32px;
+nav ul > li.folder.expanded {
 }
 
-nav ul > li.folder > .setting.active {
+nav ul > li.folder > .meta {
+	display: flex;
+}
+
+nav ul > li.folder > .meta > .alpha {
+	flex: 1;
+}
+
+nav ul > li.folder > .meta > .alpha > i {
+	margin: 0 4px 0 0;
+	vertical-align: middle;
+}
+
+nav ul > li.folder > .meta > .alpha > span {
+
+}
+
+nav ul > li.folder.expanded > .meta > .alpha > i {
+	color: white;
+	
+}
+
+nav ul > li.folder > .meta > .beta {
+	
+}
+
+nav ul > li.folder > .meta > .beta > .setting {
+	color: #aaa;
+	display: none;
+	height: 16px;
+	line-height: 16px;
+	text-align: center;
+	width: 16px;
+}
+
+nav ul > li.folder > .meta > .beta > .setting.active {
 	color: white;
 	text-shadow: 0 0 2px white;
 }
 
-nav ul > li.folder > .setting:hover {
+nav ul > li.folder > .meta > .beta > .setting:hover {
 	background-color: #888;
 }
 
-nav ul > li.folder.expanded > .setting {
+nav ul > li.folder.expanded > .meta > .beta > .setting {
 	display: block;
 }
 
-nav ul > li.folder > .setting > i {
+nav ul > li.folder > .meta > .beta > .setting > i {
 	
-}
-
-nav ul > li.folder.expanded {
-}
-
-nav ul > li.folder.expanded > i {
-	color: white;
 }
 
 nav ul > li.folder > ul {
@@ -219,42 +238,42 @@ nav ul > li.folder.red > ul > li {
 	border-left-color: #ef2929;
 }
 
-nav ul > li.folder.gray > i {
+nav ul > li.folder.gray > .meta > .alpha > i {
 	border-left-color: #ccc;
 	color: #ccc;
 }
 
-nav ul > li.folder.yellow > i {
+nav ul > li.folder.yellow > .meta > .alpha > i {
 	border-left-color: #edd400;
 	color: #edd400;
 }
 
-nav ul > li.folder.green > i {
+nav ul > li.folder.green > .meta > .alpha > i {
 	border-left-color: #73d216;
 	color: #73d216;
 }
 
-nav ul > li.folder.orange > i {
+nav ul > li.folder.orange > .meta > .alpha > i {
 	border-left-color: #f57900;
 	color: #f57900;
 }
 
-nav ul > li.folder.blue > i {
+nav ul > li.folder.blue > .meta > .alpha > i {
 	border-left-color: #729fcf;
 	color: #729fcf;
 }
 
-nav ul > li.folder.purple > i {
+nav ul > li.folder.purple > .meta > .alpha > i {
 	border-left-color: #ad7fa8;
 	color: #ad7fa8;
 }
 
-nav ul > li.folder.brown > i {
+nav ul > li.folder.brown > .meta > .alpha > i {
 	border-left-color: #c17d11;
 	color: #c17d11;
 }
 
-nav ul > li.folder.red > i {
+nav ul > li.folder.red > .meta > .alpha > i {
 	border-left-color: #ef2929;
 	color: #ef2929;
 }
@@ -391,6 +410,7 @@ nav > .archive.open > ul {
 	border-bottom: 1pt dotted #333;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+	display: flex;
 	padding: 0 0 0 8px;
 	position: relative;
 	height: 42px;
@@ -398,8 +418,12 @@ nav > .archive.open > ul {
 	text-align: left;
 }
 
-.editor > .toolbar > div:not(.manage),
-.editor > .toolbar > .manage > div {
+.editor > .toolbar > .alpha {
+	flex: 1;
+}
+
+.editor > .toolbar > .alpha > div,
+.editor > .toolbar > .beta > div {
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	display: inline-block;
@@ -412,8 +436,8 @@ nav > .archive.open > ul {
 	text-align: center;
 }
 
-.editor > .toolbar > div:not(.manage):hover,
-.editor > .toolbar > .manage > div:hover {
+.editor > .toolbar > .alpha > div:hover,
+.editor > .toolbar > .beta > div:hover {
 	background-color: #666;
 }
 
