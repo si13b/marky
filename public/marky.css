@@ -1,0 +1,528 @@
+/*  			
+  FF6600  CC6633	993300	FF6633	FF9966
+  
+  even lighter; FFbb88*/
+
+html {
+	height: 100%;
+}
+
+body {
+	-webkit-display: flex;
+	display: flex;
+	height: 100%;
+	margin: 0;
+	overflow: hidden;
+}
+
+body,
+input {
+	font-family: 'Open Sans', sans-serif;
+	font-size: 12pt;
+}
+
+button {
+	background-color: #444;
+	border: 1px solid #888;
+	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+	cursor: pointer;
+	color: #ddd;
+	padding: 8px;
+	margin: 8px 4px;
+}
+
+nav {
+	background-color: #444;
+	-moz-box-sizing: border-box;
+	border-right: 1pt dotted #222;
+	box-sizing: border-box;
+	-webkit-display: flex;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	width: 260px;
+	height: 100%;
+}
+
+nav > h1 {
+	background-color: #333;
+	border-bottom: 1pt solid black;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	color: #729fcf;
+	font-family: 'Offside', cursive;
+	font-size: 200%;
+	font-weight: normal;
+	text-align: center;
+	text-shadow: 2px 2px 0 #222;
+	padding: 0;
+	line-height: 60px;
+	margin: 0;
+	height: 60px;
+}
+
+nav > .opts {
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	text-align: center;
+	height: 42px;
+	line-height: 42px;
+}
+
+nav > .opts > div {
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	display: inline-block;
+	color: #888;
+	cursor: pointer;
+	font-size: 150%;
+	margin: 0;
+	padding: 0;
+	width: 42px;
+	text-align: center;
+}
+nav > .opts > div.open {
+	color: white;
+}
+
+nav > .opts > div:hover {
+	background-color: #666;
+}
+
+nav > .upload {
+	color: #444;
+	display: none;
+}
+
+nav > .upload.open {
+	display: block;
+}
+
+nav > ul {
+	border-top: 1pt dotted #333;
+	font-size: 90%;
+	-webkit-flex: 1;
+	flex: 1;
+	bottom: 0;
+	overflow-y: auto;
+	margin: 8px 0 0;
+	padding: 0;
+}
+
+nav ul > li {
+	color: #ddd;
+	cursor: pointer;
+	list-style-type: none;
+	margin: 0;
+	padding: 8px;
+	position: relative;
+}
+
+nav ul > li > i {
+	margin: 0 4px 0 0;
+	vertical-align: middle;
+}
+
+nav ul > li.selected {
+	background-color: #ddd;
+	color: black;
+}
+
+nav ul > li:hover:not(.folder) {
+	background-color: #888;
+}
+
+nav ul > li.folder {
+	
+}
+
+nav ul > li.folder.expanded {
+}
+
+nav ul > li.folder > .meta {
+	display: flex;
+}
+
+nav ul > li.folder > .meta > .alpha {
+	flex: 1;
+}
+
+nav ul > li.folder > .meta > .alpha > i {
+	margin: 0 4px 0 0;
+	vertical-align: middle;
+}
+
+nav ul > li.folder > .meta > .alpha > span {
+
+}
+
+nav ul > li.folder.expanded > .meta > .alpha > i {
+	color: white;
+	
+}
+
+nav ul > li.folder > .meta > .beta {
+	
+}
+
+nav ul > li.folder > .meta > .beta > .setting {
+	color: #aaa;
+	display: none;
+	height: 16px;
+	line-height: 16px;
+	text-align: center;
+	width: 16px;
+}
+
+nav ul > li.folder > .meta > .beta > .setting.active {
+	color: white;
+	text-shadow: 0 0 2px white;
+}
+
+nav ul > li.folder > .meta > .beta > .setting:hover {
+	background-color: #888;
+}
+
+nav ul > li.folder.expanded > .meta > .beta > .setting {
+	display: block;
+}
+
+nav ul > li.folder > .meta > .beta > .setting > i {
+	
+}
+
+nav ul > li.folder > ul {
+	border-top: 1px dotted #ccc;
+	display: none;
+	margin: 4px 0 0 2px;
+	padding: 4px 0 0;
+}
+
+nav ul > li.folder.expanded > ul {
+	display: block;
+}
+
+nav ul > li.folder > ul > li {
+	border-left: 4px solid #ccc;
+}
+
+nav ul > li.folder.gray > ul > li {
+	border-left-color: #ccc;
+}
+
+nav ul > li.folder.yellow > ul > li {
+	border-left-color: #edd400;
+}
+
+nav ul > li.folder.green > ul > li {
+	border-left-color: #73d216;
+}
+
+nav ul > li.folder.orange > ul > li {
+	border-left-color: #f57900;
+}
+
+nav ul > li.folder.blue > ul > li {
+	border-left-color: #729fcf;
+}
+
+nav ul > li.folder.purple > ul > li {
+	border-left-color: #ad7fa8;
+}
+
+nav ul > li.folder.brown > ul > li {
+	border-left-color: #c17d11;
+}
+
+nav ul > li.folder.red > ul > li {
+	border-left-color: #ef2929;
+}
+
+nav ul > li.folder.gray > .meta > .alpha > i {
+	border-left-color: #ccc;
+	color: #ccc;
+}
+
+nav ul > li.folder.yellow > .meta > .alpha > i {
+	border-left-color: #edd400;
+	color: #edd400;
+}
+
+nav ul > li.folder.green > .meta > .alpha > i {
+	border-left-color: #73d216;
+	color: #73d216;
+}
+
+nav ul > li.folder.orange > .meta > .alpha > i {
+	border-left-color: #f57900;
+	color: #f57900;
+}
+
+nav ul > li.folder.blue > .meta > .alpha > i {
+	border-left-color: #729fcf;
+	color: #729fcf;
+}
+
+nav ul > li.folder.purple > .meta > .alpha > i {
+	border-left-color: #ad7fa8;
+	color: #ad7fa8;
+}
+
+nav ul > li.folder.brown > .meta > .alpha > i {
+	border-left-color: #c17d11;
+	color: #c17d11;
+}
+
+nav ul > li.folder.red > .meta > .alpha > i {
+	border-left-color: #ef2929;
+	color: #ef2929;
+}
+
+nav ul > li.folder > .settings {
+	display: none;
+	padding: 8px 0;
+}
+
+nav ul > li.folder.expanded > .settings.shown {
+	display: block;
+}
+
+nav ul > li.folder > .settings > .colours {
+	margin: 4px 0;
+	text-align: center;
+}
+
+nav ul > li.folder > .settings > .colours > .colour {
+	cursor: pointer;
+	display: inline-block;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	line-height: 32px;
+	width: 32px;
+	height: 32px;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.gray {
+	background-color: #ccc;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.yellow {
+	background-color: #edd400;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.green {
+	background-color: #73d216;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.orange {
+	background-color: #f57900;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.blue {
+	background-color: #729fcf;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.purple {
+	background-color: #ad7fa8;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.brown {
+	background-color: #c17d11;
+}
+
+nav ul > li.folder > .settings > .colours > .colour.red {
+	background-color: #ef2929;
+}
+
+nav > .archive {
+	background-color: #222;
+	border-top: 2px solid #666;
+	-webkit-display: flex;
+	display: flex;
+	flex-direction: column;
+}
+
+nav > .archive.open {
+	-webkit-flex: 1;
+	flex: 1;
+}
+
+nav > .archive > .title {
+	color: #888;
+	cursor: pointer;
+	margin: 4px;
+	text-align: center;
+}
+
+nav > .archive > ul {
+	display: none;
+	-webkit-flex: 1;
+	flex: 1;
+	overflow-y: auto;
+}
+
+nav > .archive.open > ul {
+	display: block;
+}
+
+.editor {
+	display: none;
+	-webkit-flex: 1;
+	flex: 1;
+	height: 100%;
+}
+
+.editor.selected {
+	-webkit-display: flex;
+	display: flex;
+	flex-direction: column;
+}
+
+.editor > .title {
+	background-color: #333;
+	border-bottom: 1pt solid black;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	font-size: 130%;
+	height: 60px;
+	padding: 0 16px;
+}
+
+.editor > .title > input {
+	background: none;
+	border: none;
+	color: #999;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	font-size: 120%;
+	width: 100%;
+	height: 60px;
+}
+
+.editor:not(.selected) > .title:after {
+	content: 'Select or create a note and start editing!';
+	color: #888;
+	display: block;
+}
+
+.editor > .toolbar {
+	background-color: #444;
+	border-bottom: 1pt dotted #333;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	display: flex;
+	padding: 0 0 0 8px;
+	position: relative;
+	height: 42px;
+	line-height: 42px;
+	text-align: left;
+}
+
+.editor > .toolbar > .alpha {
+	flex: 1;
+}
+
+.editor > .toolbar > .alpha > div,
+.editor > .toolbar > .beta > div {
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	display: inline-block;
+	color: #888;
+	cursor: pointer;
+	font-size: 150%;
+	margin: 0;
+	padding: 0;
+	width: 42px;
+	text-align: center;
+}
+
+.editor > .toolbar > .alpha > div:hover,
+.editor > .toolbar > .beta > div:hover {
+	background-color: #666;
+}
+
+.editor > .toolbar > .manage {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.editor > #aceeditor {
+	display: none;
+	font-size: 110%;
+	-webkit-flex: 1;
+	flex: 1;
+}
+
+.editor.selected > #aceeditor {
+	display: block;
+}
+
+.msg {
+	background-color: #eee;
+	border-radius: 0 0 4px 4px;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	box-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
+	color: #888;
+	font-size: 120%;
+	padding: 8px 16px;
+	position: absolute;
+	top: 0;
+	left: 50%;
+	text-align: center;
+	z-index: 1;
+}
+
+.panel {
+	background-color: #444;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	color: #ddd;
+	font-size: 90%;
+	margin: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 101;
+}
+
+.panel > ul {
+	margin: 0;
+	padding: 0;
+}
+
+.panel > ul > li {
+	cursor: pointer;
+	list-style-type: none;
+	margin: 0;
+	padding: 8px;
+}
+
+.panel > ul > li:hover {
+	background-color: #888;
+}
+
+
+.overlay {
+     position: absolute;
+     left: 0px;
+     top: 0px;
+     width: 100%;
+     height: 100%;
+     z-index: 100;
+}
+
+.blank {
+	background-color: black;
+	color: #666;
+	font-size: 200%;
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 260px;
+	text-align: center;
+	padding: 32px;
+	z-index: -1;
+}
