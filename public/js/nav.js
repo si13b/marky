@@ -102,25 +102,7 @@ marky.nav = new Class({
 			this._renderItem(item, key, this._elList);
 		}.bind(this));
 		
-		var elArchive = new Element('div', {
-			'class': 'archive'
-		});
-		
-		elArchive.grab(new Element('div', {
-			'class': 'title',
-			'html': '<i class="foundicon-inbox"></i>&nbsp;Archive',
-			'events': {
-				'click': this._toggleArchive
-			}
-		}));
-		
-		this._elArchiveList = new Element('ul', {});
-		
-		elArchive.grab(this._elArchiveList);
-		
-		// TODO Render out archive items
-		
-		this.element.adopt(this._elOpts, this._elUpload, this._elList, elArchive);
+		this.element.adopt(this._elOpts, this._elUpload, this._elList);
 	},
 	
 	_renderItem: function(item, key, elParent) {

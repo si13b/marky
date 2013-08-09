@@ -85,12 +85,6 @@ marky.content = new Class({
 			'class': 'beta'
 		}).adopt(
 			new Element('div', {
-				'title': 'Archive',
-				'events': {
-					'click': this._archive
-				}
-			}).grab(new Element('i', {'class': 'foundicon-mail'})),
-			new Element('div', {
 				'title': 'Delete',
 				'events': {
 					'click': this._delete
