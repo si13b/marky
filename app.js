@@ -19,17 +19,18 @@ var db = new MarkyDB({ // TODO Configurable
 	name: 'marky'
 });
 
-app.get('/tree/get', db.getTree);
 app.get('/download', db.dump);
-app.get('/folders/get', db.getFolders);
 app.get('/note/get', db.getNote);
 app.get('/note/add', db.addNote);
 app.get('/note/delete', db.deleteNote);
+app.get('/note/content', db.saveContent);
+app.get('/note/rename', db.saveName);
+app.get('/note/move', db.move);
+app.get('/folder/tree', db.getTree);
+app.get('/folder/list', db.getFolders);
 app.get('/folder/add', db.addFolder);
-app.get('/colour/save', db.saveColour);
-app.get('/content/save', db.saveContent);
-app.get('/name/save', db.saveName);
-app.get('/move', db.move);
+app.get('/folder/colour', db.saveColour);
+
 
 //app.post('/json/', authFunc,)
 

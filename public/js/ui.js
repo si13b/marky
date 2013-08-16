@@ -26,17 +26,10 @@ var marky = {};
 		render: function() {
 			
 			
-			this._db = new marky.db({
-				onOpen: this._onDBOpen
-			});
-			// TODO bottom tabs? Edit, Preview, Manage (icon)
-		},
-		
-		_onDBOpen: function() {
+			this._db = new marky.request();
 			this._content = new marky.content({}, this._db);
 			this._nav = new marky.nav({}, this._content, this._db);
 		}
-	
 	});
 
 	window.addEvent('domready', function() {

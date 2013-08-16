@@ -1,3 +1,4 @@
+// NOTE: Old IDB code. Now using Mongo back-end. Could use IDB in future for offline storage.
 marky.db = new Class({
 	Implements: [Options, Events],
 
