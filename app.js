@@ -1,6 +1,5 @@
 //require('mootools');
-require('mootools');
-require('mootools-more');
+require('./util');
 var express = require('express');
 var MarkyDB = require('./db').MarkyDB;
 
@@ -13,7 +12,7 @@ app.configure(function() {
 
 //app.get('/json/')
 
-var db = new MarkyDB({ // TODO Configurable
+var db = MarkyDB.create({ // TODO Configurable
 	host: 'localhost',
 	port: 27017, 
 	name: 'marky'

@@ -2,137 +2,117 @@ var Db = require('mongodb').Db;
 var Connection = require('mongodb').Connection;
 var Server = require('mongodb').Server;
 var ObjectID = require('mongodb').ObjectID;
+var util = require('./util');
 
-var MarkyDB = new Class({
-	Implements: [Options, Events],
+var MarkyDB = new util.Class();
 
-	Binds: [
-		'_get',
-		'_getJSON',
-		'getTree',
-		'dump',
-		'getFolders',
-		'getNote',
-		'addNote',
-		'addFolder',
-		'deleteNote',
-		'saveColour',
-		'saveContent',
-		'saveName',
-		'move'
-	],
+MarkyDB.defaultOptions({
+	test: 'hello'
+});
 
-	options: {
-		host: 'localhost',
-		port: 27017,
-		name: 'marky'
-	},
-	
-	_db: null,
+MarkyDB.field('_db', null);
 
-	initialize: function(options) {
-		this.setOptions(options);
-	},
-	
-	_get: function(name, callback) {
-		console.log('Getting connection...');
-		if (!this._db) {
-			console.log('Creating new connection...');
-			this._db = new Db(this.options.name, new Server(this.options.host, this.options.port, {auto_reconnect: true}, {}), {safe: true});
-			this._db.open(function() {
-				this._db.collection(name, callback);
-			}.bind(this));
-		} else {
+MarkyDB.method('_get', function(name, callback) {
+	console.log('Getting connection...');
+	if (!this._db) {
+		console.log('Creating new connection...');
+		this._db = new Db(this.options.name, new Server(this.options.host, this.options.port, {auto_reconnect: true}, {}), {safe: true});
+		this._db.open(function() {
 			this._db.collection(name, callback);
-		}
-	},
-	
-	_getJSON: function(req) {
-		try {
-			return JSON.parse(req.body);
-		} catch (e) {
-			return null;
-		}
-	},
-	
-	getTree: function(req, resp) {
-		console.log('Getting tree');
-		this._get('public', function(error, col) {
-			console.log('Responding...');
-			resp.end(JSON.stringify({msg: "Get tree!\n"}));
 		}.bind(this));
-	},
+	} else {
+		this._db.collection(name, callback);
+	}
+});
 	
-	dump: function(req, resp) {
-		this._get('public', function(error, col) {
-			resp.end("Download!\n");
-		}.bind(this));
-	},
+MarkyDB.method('_getJSON', function(text) {
+	try {
+		return JSON.parse(text);
+	} catch (e) {
+		console.dir(e);
+		return null;
+	}
+});
 	
-	getFolders: function(req, resp) {
-		this._get('public', function(error, col) {
-			resp.end("Get folders!\n");
-		}.bind(this));
-	},
+MarkyDB.method('getTree', function(req, resp) {
+	console.log('Getting tree');
+	this._get('public', function(error, col) {
+		console.log('Responding...');
+		
+		// TODO iterate collection result
+		//resp.end(JSON.stringify(col));
+	}.bind(this));
+});
+
+MarkyDB.method('dump', function(req, resp) {
+	this._get('public', function(error, col) {
+		resp.end("Download!\n");
+	}.bind(this));
+});
+
+MarkyDB.method('getFolders', function(req, resp) {
+	this._get('public', function(error, col) {
+		resp.end("Get folders!\n");
+	}.bind(this));
+});
+
+MarkyDB.method('addNote', function(req, resp) {
+	var json = req.query;
+	if (!json) {
+		resp.writeHead('500', {'Content-Type': 'text/json'});
+		resp.end("Error\n");
+		console.log('Error, JSON not parsed: ' + json);
+		return;
+	}
 	
-	addNote: function(req, resp) {
-		var json = this._getJSON(req);
-		if (!json) {
+	this._get('public', function(error, col) {
+		if (error) {
 			resp.writeHead('500', {'Content-Type': 'text/json'});
 			resp.end("Error\n");
-			console.log('Error, JSON could not be parsed');
+			console.log('Error retrieving the collection');
 			return;
 		}
 		
-		this._get('public', function(error, col) {
-			if (error) {
-				resp.writeHead('500', {'Content-Type': 'text/json'});
-				resp.end("Error\n");
-				console.log('Error retrieving the collection');
-				return;
-			}
-			
-			var oid = new ObjectID();
-			
-			col.insert({
-				_id: oid,
-				name: json.name, // TODO default name?
-				parent: json.parent || undefined,
-				content: ''
-			}, function() {
-				resp.writeHead('200', {'Content-Type': 'text/json'});
-				resp.end(JSON.stringify({id: oid}));
-			});
-		}.bind(this));
-	},
-	
-	addFolder: function(req, resp) {
+		var oid = new ObjectID();
 		
-	},
+		col.insert({
+			_id: oid,
+			name: json.name, // TODO default name?
+			parent: json.parent || undefined,
+			content: ''
+		}, function() {
+			resp.writeHead('200', {'Content-Type': 'text/json'});
+			resp.end(JSON.stringify({id: oid}));
+		});
+	}.bind(this));
+});
+
+MarkyDB.method('addFolder', function(req, resp) {
 	
-	deleteNote: function(req, resp) {
-		
-	},
+});
+
+MarkyDB.method('deleteNote', function(req, resp) {
 	
-	getNote: function(req, resp) {
-		
-	},
+});
+
+MarkyDB.method('getNote', function(req, resp) {
 	
-	saveContent: function(req, resp) {
-		
-	},
+});
+
+MarkyDB.method('saveContent', function(req, resp) {
 	
-	saveName: function(req, resp) {
-		
-	},
+});
+
+MarkyDB.method('saveName', function(req, resp) {
 	
-	saveColour: function(req, resp) {
-		
-	},
+});
+
+MarkyDB.method('saveColour', function(req, resp) {
 	
-	move: function(req, resp) {
-		
-	}
+});
+
+MarkyDB.method('move', function(req, resp) {
+	
 });
 
 exports.MarkyDB = MarkyDB;

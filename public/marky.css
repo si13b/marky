@@ -34,7 +34,6 @@ button {
 nav {
 	background-color: #444;
 	-moz-box-sizing: border-box;
-	border-right: 1pt dotted #222;
 	box-sizing: border-box;
 	-webkit-display: flex;
 	display: flex;
@@ -46,7 +45,6 @@ nav {
 
 nav > h1 {
 	background-color: #333;
-	border-bottom: 1pt solid black;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	color: #729fcf;
@@ -99,7 +97,6 @@ nav > .upload.open {
 }
 
 nav > ul {
-	border-top: 1pt dotted #333;
 	font-size: 90%;
 	-webkit-flex: 1;
 	flex: 1;
@@ -380,7 +377,6 @@ nav > .archive.open > ul {
 
 .editor > .title {
 	background-color: #333;
-	border-bottom: 1pt solid black;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	font-size: 130%;
