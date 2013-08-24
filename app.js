@@ -2,6 +2,7 @@
 require('./util');
 var express = require('express');
 var MarkyDB = require('./db').MarkyDB;
+var config = require('./config.json');
 
 var app = express();
 
@@ -13,9 +14,9 @@ app.configure(function() {
 //app.get('/json/')
 
 var db = MarkyDB.create({ // TODO Configurable
-	host: 'localhost',
-	port: 27017, 
-	name: 'marky'
+	host: config.mongo.host,
+	port: config.mongo.port, 
+	name: config.mongo.name
 });
 
 app.get('/download', db.dump);
@@ -35,5 +36,5 @@ app.get('/folder/colour', db.saveColour);
 
 //resp.redirect() ??
 
-app.listen(3000); // TODO Configurable
+app.listen(config.port); // TODO Configurable
 console.log('Now listening on port 3000...');
