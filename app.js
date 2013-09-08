@@ -1,3 +1,5 @@
+#!/usr/bin/nodejs
+
 //require('mootools');
 require('./util');
 var express = require('express');
@@ -7,17 +9,18 @@ var config = require('./config.json');
 var app = express();
 
 app.configure(function() {
+	app.use(express.basicAuth(function(user, pass) {
+		return user === 'admin' && pass === 'admin123';
+	}));
 	app.use(express.bodyParser());
 	app.use(express.static(__dirname + '/public'));
 });
 
 //app.get('/json/')
 
-var db = MarkyDB.create({ // TODO Configurable
-	host: config.mongo.host,
-	port: config.mongo.port, 
-	name: config.mongo.name
-});
+var db = MarkyDB.create(config.db);
+
+db.connect();
 
 app.get('/download', db.dump);
 app.get('/note/get', db.getNote);
