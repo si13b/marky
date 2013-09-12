@@ -70,13 +70,7 @@ marky.nav = new Class({
 				'events': {
 					'click': this._download
 				}
-			}).grab(new Element('i', {'class': 'foundicon-inbox'})),
-			new Element('div', {
-				'title': 'Import data',
-				'events': {
-					'click': this._toggleUpload
-				}
-			}).grab(new Element('i', {'class': 'foundicon-up-arrow'}))
+			}).grab(new Element('i', {'class': 'foundicon-inbox'}))
 		);
 		
 		this._elUpload = new Element('div', {
@@ -98,20 +92,22 @@ marky.nav = new Class({
 			}
 		});
 		
-		Object.each(tree, function(item, key) {
-			this._renderItem(item, key, this._elList);
-		}.bind(this));
+		if (tree && tree.length) {
+			tree.each(function(item) {
+				this._renderItem(item, this._elList);
+			}.bind(this));
+		}
 		
 		this.element.adopt(this._elOpts, this._elUpload, this._elList);
 	},
 	
-	_renderItem: function(item, key, elParent) {
+	_renderItem: function(item, elParent) {
 		var elItem = null;
 			
 		if (item.folder) {
 			elItem = new Element('li', {
 				'class': 'folder ' + item.colour,
-				'data-id': key
+				'data-id': item._id
 			});
 			
 			var elAlpha = new Element('div', {
@@ -141,15 +137,17 @@ marky.nav = new Class({
 			var elTree = new Element('ul', {
 			});
 			
-			Object.each(item.items, function(subItem, subKey) {
-				this._renderItem(subItem, subKey, elTree);
-			}.bind(this));
+			if (item.items) {
+				item.items.each(function(subItem) {
+					this._renderItem(subItem, elTree);
+				}.bind(this));
+			}
 			
 			elItem.adopt(elMeta, this._renderSettings(item), elTree);
 		} else {
 			elItem = new Element('li', {
 				'html': item.name,
-				'data-id': key
+				'data-id': item._id
 			});
 		}
 		

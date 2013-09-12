@@ -16,23 +16,22 @@ app.configure(function() {
 	app.use(express.static(__dirname + '/public'));
 });
 
-//app.get('/json/')
+//app.post('/json/')
 
 var db = MarkyDB.create(config.db);
-
 db.connect();
 
-app.get('/download', db.dump);
-app.get('/note/get', db.getNote);
-app.get('/note/add', db.addNote);
-app.get('/note/delete', db.deleteNote);
-app.get('/note/content', db.saveContent);
-app.get('/note/rename', db.saveName);
-app.get('/note/move', db.move);
-app.get('/folder/tree', db.getTree);
-app.get('/folder/list', db.getFolders);
-app.get('/folder/add', db.addFolder);
-app.get('/folder/colour', db.saveColour);
+app.post('/download', db.dump);
+app.post('/note/get', db.getNote);
+app.post('/note/add', db.addNote);
+app.post('/note/delete', db.deleteNote);
+app.post('/note/content', db.saveContent);
+app.post('/note/rename', db.saveName);
+app.post('/note/move', db.move);
+app.post('/folder/tree', db.getTree);
+app.post('/folder/list', db.getFolders);
+app.post('/folder/add', db.addFolder);
+app.post('/folder/colour', db.saveColour);
 
 
 //app.post('/json/', authFunc,)

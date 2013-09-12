@@ -1,27 +1,30 @@
 var util = require('./util');
-var pg = require('pg');
+var Db = require('mongodb').Db,
+	MongoClient = require('mongodb').MongoClient,
+	ObjectID = require('mongodb').ObjectID,
+	Server = require('mongodb').Server;
+
+// See docs @ http://mongodb.github.io/node-mongodb-native/
 
 var MarkyDB = new util.Class();
 
 MarkyDB.defaultOptions({
 	host: 'localhost',
-	port: 5432,
+	port: 27017,
 	name: 'marky'
 });
 
 MarkyDB.field('_db', null);
 
 MarkyDB.method('connect', function() {
-	var conString = 'postgres://marky:' + this.options.port + '@' + this.options.host + '/' + this.options.name;
+	this._db = new Db(this.options.name, new Server(this.options.host, this.options.port));
 	
-	this._db = new pg.Client(conString);
-	this._db.connect(function(err) {
-		if (err) {
-			console.error('could not connect to postgres', err);
-			this._db = null;
-			return;
+	this._db.open(function(err, db) {
+		if (!err) {
+			console.log("Connected to mongo!");
+		} else {
+			console.error(err);
 		}
-		console.log('Connected');
 	}.bind(this));
 });
 
@@ -35,7 +38,67 @@ MarkyDB.method('_getJSON', function(text) {
 });
 	
 MarkyDB.method('getTree', function(req, resp) {
-	resp.end("Get tree!\n");
+	var folders = this._db.collection('folders');
+	var notes = this._db.collection('notes');
+	
+	var tree = [];
+	
+	var c = 0, ready = false;
+		
+	folders.find().toArray(function(err, docs) {
+		if (err) {
+			console.error(err);
+			resp.end(err); // TODO Ick
+			return;
+		}
+		
+		docs.forEach(function(folderItem) {
+			var o = {
+				_id: folderItem._id,
+				name: folderItem.name,
+				colour: folderItem.colour,
+				folder: true
+			};
+			
+			console.dir(o);
+		
+			tree.push(o);
+			
+			c++;
+			notes.find({folder: folderItem._id, user: 'admin'}).toArray(function(err, noteDocs) {
+				c--;
+				if (!o.items) o.items = [];
+				
+				o.items.push({
+					_id: noteDocs._id,
+					name: noteDocs.name,
+					content: noteDocs.content
+				});
+				
+				if (ready && !c) resp.end(JSON.stringify(tree));
+			});
+		}.bind(this));
+		
+		c++;
+		notes.find({user: 'admin'}).toArray(function(err, noteDocs) {
+			c--;
+			
+			console.dir(noteDocs);
+			
+			noteDocs.forEach(function(noteItem) {
+				if (noteItem.folder) return;
+				tree.push({
+					_id: noteItem._id,
+					name: noteItem.name,
+					content: noteItem.content
+				});
+			}.bind(this))
+			
+			if (ready && !c) resp.end(JSON.stringify(tree));
+		});
+		
+		ready = true;
+	}.bind(this));
 });
 
 MarkyDB.method('dump', function(req, resp) {
@@ -47,7 +110,20 @@ MarkyDB.method('getFolders', function(req, resp) {
 });
 
 MarkyDB.method('addNote', function(req, resp) {
+	// name, parent
+	var notes = this._db.collection('notes');
 	
+	var o = {
+		name: req.body.name,
+		parent: req.body.parent,
+		content: '',
+		user: 'admin' // TODO - Real users
+	} // TODO key for user
+	
+	// _id generated automatically
+	notes.insert(o, {w: 1}, function(err, result) {
+		resp.end(JSON.stringify(o));
+	});
 });
 
 MarkyDB.method('addFolder', function(req, resp) {
