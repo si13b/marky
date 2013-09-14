@@ -22,10 +22,11 @@ var db = MarkyDB.create(config.db);
 db.connect();
 
 app.post('/download', db.dump);
-app.post('/note/get', db.getNote);
+//app.post('/note/get', db.getNote);
 app.post('/note/add', db.addNote);
 app.post('/note/delete', db.deleteNote);
-app.post('/note/content', db.saveContent);
+app.post('/note/content/get', db.getContent);
+app.post('/note/content/save', db.saveContent);
 app.post('/note/rename', db.saveName);
 app.post('/note/move', db.move);
 app.post('/folder/tree', db.getTree);

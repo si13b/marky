@@ -134,8 +134,22 @@ MarkyDB.method('deleteNote', function(req, resp) {
 	
 });
 
-MarkyDB.method('getNote', function(req, resp) {
-	
+MarkyDB.method('getContent', function(req, resp) {
+	var notes = this._db.collection('notes');
+		
+	console.log('getting content for: ' + req.body.note);
+		
+	notes.findOne({_id: req.body.note}, function(err, item) {
+		if (err) {
+			console.error(err);
+			resp.end(err); // TODO Ick
+			return;
+		}
+		
+		resp.end(JSON.stringify({
+			content: item.content
+		}));
+	}.bind(this));
 });
 
 MarkyDB.method('saveContent', function(req, resp) {
