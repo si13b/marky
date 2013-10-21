@@ -1,7 +1,3 @@
 marky
 =====
-A simple web-based note taking app that combines:
-* Markdown
-* Ace editor http://ace.ajax.org/
-* IndexedDB
-
+A hierarchial programmers notepad utilising the simplicity of Markdown in the web with the ACE editor.

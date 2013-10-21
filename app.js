@@ -31,6 +31,8 @@ app.post('/note/rename', db.saveName);
 app.post('/note/move', db.move);
 app.post('/folder/tree', db.getTree);
 app.post('/folder/list', db.getFolders);
+app.post('/folder/delete', db.deleteFolder);
+app.post('/folder/rename', db.renameFolder);
 app.post('/folder/add', db.addFolder);
 app.post('/folder/colour', db.saveColour);
 

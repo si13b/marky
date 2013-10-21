@@ -48,9 +48,9 @@ marky.request = new Class({
 		});
 	},
 	
-	saveColour: function(noteID, colour, callback) {
+	saveColour: function(folderID, colour, callback) {
 		new Request.JSON({url: '/folder/colour', onSuccess: callback, onError: this._error, onFailure: this._error}).post({
-			note: noteID,
+			folder: folderID,
 			colour: colour
 		});
 	},
@@ -66,6 +66,12 @@ marky.request = new Class({
 	deleteNote: function(noteID, callback) {
 		new Request.JSON({url: '/note/delete', onSuccess: callback, onError: this._error, onFailure: this._error}).post({
 			note: noteID
+		});
+	},
+	
+	deleteFolder: function(folderID, callback) {
+		new Request.JSON({url: '/folder/delete', onSuccess: callback, onError: this._error, onFailure: this._error}).post({
+			folder: folderID
 		});
 	},
 	
@@ -85,6 +91,13 @@ marky.request = new Class({
 	saveName: function(noteID, name, callback) {
 		new Request.JSON({url: '/note/rename', onSuccess: callback, onError: this._error, onFailure: this._error}).post({
 			note: noteID,
+			name: name
+		});
+	},
+	
+	renameFolder: function(folderID, name, callback) {
+		new Request.JSON({url: '/folder/rename', onSuccess: callback, onError: this._error, onFailure: this._error}).post({
+			folder: folderID,
 			name: name
 		});
 	},

@@ -253,11 +253,11 @@ marky.nav = new Class({
 	_addItem: function() {
 		// TODO get parent ID of context
 		
-		this._db.addNote(this.options.defaultName, null, function(newID) {
+		this._db.addNote(this.options.defaultName, null, function(newNote) {
 			this._elList.grab(
 				new Element('li', {
 					text: this.options.defaultName,
-					'data-id': newID
+					'data-id': newNote._id
 				})
 			)
 		}.bind(this));
@@ -283,14 +283,8 @@ marky.nav = new Class({
 	},
 	
 	_addFolder: function(event) {
-		this._db.addFolder(this.options.defaultFolderName, null, function(newID) {
-			var o = {
-				folder: true,
-				name: this.options.defaultFolderName,
-				items: []
-			};
-			
-			this._renderItem(o, newID, this._elList);
+		this._db.addFolder(this.options.defaultFolderName, null, function(newFolder) {
+			this._renderItem(newFolder, this._elList);
 		}.bind(this));
 	},
 	
@@ -301,10 +295,17 @@ marky.nav = new Class({
 		if (el) el.destroy();
 	},
 	
-	_deleteFolder: function(item) {
-		// TODO call db
-		// TODO Remove all child objects from folder
-		// TODO Remove folder display object itself
+	_deleteFolder: function(event) {
+		var element = $(event.target);
+		var elFolder = element.getParent('.folder');
+		var folder = elFolder.get('data-id');
+		
+		// TODO Move child elements to top level (DB does the same)
+		// TODO Some kind of confirmation here before proceeding
+		
+		this._db.deleteFolder(folder, function() {
+			if (elFolder) elFolder.destroy();
+		}.bind(this));
 	},
 	
 	_moveItem: function(item, moveTo) {
@@ -323,7 +324,7 @@ marky.nav = new Class({
 		var elFolder = element.getParent('.folder');
 		var folder = elFolder.get('data-id');
 		
-		this._db.saveName(folder, title, function() {
+		this._db.renameFolder(folder, title, function() {
 			elFolder.getElement('span').set('html', title);
 		}.bind(this));
 	},

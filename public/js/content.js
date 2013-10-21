@@ -122,7 +122,7 @@ marky.content = new Class({
 			
 			Object.each(folders, function(item) {
 				elList.grab(new Element('li', {
-					'data-id': item.id,
+					'data-id': item._id,
 					'html': item.name
 				}));
 			}.bind(this));

@@ -60,33 +60,31 @@ MarkyDB.method('getTree', function(req, resp) {
 				folder: true
 			};
 			
-			console.dir(o);
-		
-			tree.push(o);
-			
 			c++;
-			notes.find({folder: folderItem._id, user: 'admin'}).toArray(function(err, noteDocs) {
+			notes.find({parent: folderItem._id, user: 'admin'}).toArray(function(err, noteDocs) {
 				c--;
 				if (!o.items) o.items = [];
 				
-				o.items.push({
-					_id: noteDocs._id,
-					name: noteDocs.name,
-					content: noteDocs.content
-				});
+				noteDocs.forEach(function(noteItem) {
+					o.items.push({
+						_id: noteItem._id,
+						name: noteItem.name,
+						content: noteItem.content
+					});
+				}.bind(this));
 				
 				if (ready && !c) resp.end(JSON.stringify(tree));
 			});
+			
+			tree.push(o);
 		}.bind(this));
 		
 		c++;
 		notes.find({user: 'admin'}).toArray(function(err, noteDocs) {
 			c--;
 			
-			console.dir(noteDocs);
-			
 			noteDocs.forEach(function(noteItem) {
-				if (noteItem.folder) return;
+				if (noteItem.parent) return;
 				tree.push({
 					_id: noteItem._id,
 					name: noteItem.name,
@@ -106,7 +104,17 @@ MarkyDB.method('dump', function(req, resp) {
 });
 
 MarkyDB.method('getFolders', function(req, resp) {
+	var folders = this._db.collection('folders');
 	
+	folders.find().toArray(function(err, docs) {
+		if (err) {
+			console.error(err);
+			resp.end(err); // TODO Ick
+			return;
+		}
+		
+		resp.end(JSON.stringify(docs));
+	});
 });
 
 MarkyDB.method('addNote', function(req, resp) {
@@ -127,45 +135,183 @@ MarkyDB.method('addNote', function(req, resp) {
 });
 
 MarkyDB.method('addFolder', function(req, resp) {
+	var folders = this._db.collection('folders');
 	
+	var o = {
+		name: req.body.name,
+		folder: true,
+		user: 'admin' // TODO - Real users
+	} // TODO key for user
+	
+	// _id generated automatically
+	folders.insert(o, {w: 1}, function(err, result) {
+		resp.end(JSON.stringify(o));
+	});
 });
 
 MarkyDB.method('deleteNote', function(req, resp) {
+	var notes = this._db.collection('notes');
+		
+	notes.remove({_id: new ObjectID(req.body.note)}, true);
+	
+	resp.end(JSON.stringify({
+		success: true
+	}));
+});
+
+MarkyDB.method('deleteFolder', function(req, resp) {
+	var folders = this._db.collection('folders');
+	var notes = this._db.collection('notes');
+	
+	notes.find({parent: new ObjectID(req.body.folder), user: 'admin'}).toArray(function(err, noteDocs) {
+		if (err || !noteDocs) {
+			console.error(err);
+			resp.end(JSON.stringify({
+				error: err || 'Object is null'
+			}));
+			return;
+		}
+		
+		noteDocs.forEach(function(noteItem) {
+			noteItem.parent = null;
+			
+			notes.save(noteItem);
+		}.bind(this));
+		
+		folders.remove({_id: new ObjectID(req.body.folder)}, true);
+		
+		resp.end(JSON.stringify({
+			success: true
+		}));
+	});
+	
 	
 });
 
 MarkyDB.method('getContent', function(req, resp) {
 	var notes = this._db.collection('notes');
 		
-	console.log('getting content for: ' + req.body.note);
-		
-	notes.findOne({_id: req.body.note}, function(err, item) {
-		if (err) {
+	notes.findOne({_id: new ObjectID(req.body.note)}, function(err, item) {
+		if (err || !item) {
 			console.error(err);
-			resp.end(err); // TODO Ick
+			resp.end(JSON.stringify({
+				error: err || 'Object is null'
+			}));
 			return;
 		}
 		
-		resp.end(JSON.stringify({
-			content: item.content
-		}));
+		resp.end(JSON.stringify(item));
 	}.bind(this));
 });
 
 MarkyDB.method('saveContent', function(req, resp) {
-	
+	var notes = this._db.collection('notes');
+		
+	notes.findOne({_id: new ObjectID(req.body.note)}, function(err, item) {
+		if (err || !item) {
+			console.error(err);
+			resp.end(JSON.stringify({
+				error: err || 'Object is null'
+			}));
+			return;
+		}
+		
+		item.content = req.body.content;
+		
+		notes.save(item);
+		
+		resp.end(JSON.stringify({
+			success: true
+		}));
+	}.bind(this));
 });
 
 MarkyDB.method('saveName', function(req, resp) {
-	
+	var notes = this._db.collection('notes');
+		
+	notes.findOne({_id: new ObjectID(req.body.note)}, function(err, item) {
+		if (err || !item) {
+			console.error(err);
+			resp.end(JSON.stringify({
+				error: err || 'Object is null'
+			}));
+			return;
+		}
+		
+		item.name = req.body.name;
+		
+		notes.save(item);
+		
+		resp.end(JSON.stringify({
+			success: true
+		}));
+	}.bind(this));
+});
+
+MarkyDB.method('renameFolder', function(req, resp) {
+	var folders = this._db.collection('folders');
+		
+	folders.findOne({_id: new ObjectID(req.body.folder)}, function(err, item) {
+		if (err || !item) {
+			console.error(err);
+			resp.end(JSON.stringify({
+				error: err || 'Object is null'
+			}));
+			return;
+		}
+		
+		item.name = req.body.name;
+		
+		folders.save(item);
+		
+		resp.end(JSON.stringify({
+			success: true
+		}));
+	}.bind(this));
 });
 
 MarkyDB.method('saveColour', function(req, resp) {
-	
+	var folders = this._db.collection('folders');
+		
+	folders.findOne({_id: new ObjectID(req.body.folder)}, function(err, item) {
+		if (err || !item) {
+			console.error(err);
+			resp.end(JSON.stringify({
+				error: err || 'Object is null'
+			}));
+			return;
+		}
+		
+		item.colour = req.body.colour;
+		
+		folders.save(item);
+		
+		resp.end(JSON.stringify({
+			success: true
+		}));
+	}.bind(this));
 });
 
 MarkyDB.method('move', function(req, resp) {
-	
+	var notes = this._db.collection('notes');
+		
+	notes.findOne({_id: new ObjectID(req.body.note)}, function(err, item) {
+		if (err || !item) {
+			console.error(err);
+			resp.end(JSON.stringify({
+				error: err || 'Object is null'
+			}));
+			return;
+		}
+		
+		item.parent = req.body.parent ? new ObjectID(req.body.parent) : null;
+		
+		notes.save(item);
+		
+		resp.end(JSON.stringify({
+			success: true
+		}));
+	}.bind(this));
 });
 
 exports.MarkyDB = MarkyDB;
