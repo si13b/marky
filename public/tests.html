@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+	<title>Marky Tests</title>
+	<link rel="stylesheet" href="qunit-1.12.0.css">
+</head>
+<body>
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>
+	<script src="libjs/jquery-2.0.3.min.js"></script>
+	<script src="libjs/qunit-1.12.0.js"></script>
+	<script src="libjs/funcunit.js"></script>
+	<script>
+		(function() {
+			module('marky', {
+				setup: function() {
+					F.open('index.html');
+				}
+			});
+			
+			test("Basic UI Checks", function() {
+				ok( 1 == "1", "Passed!" );
+				F('nav > h1').visible('Marky title should be visible!');
+				equal(F('nav > h1').text().trim(), 'marky', 'Marky title should be "marky"');
+			});
+		})();
+	</script>
+</body>
+</html>
