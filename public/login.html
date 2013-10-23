@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="icon" type="image/png" href="marky.png">
+    <title>marky</title>
+    <link href="foundation-icons/stylesheets/general_foundicons.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Offside' rel='stylesheet' type='text/css'>
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel='stylesheet' type='text/css'>
+    <style type="text/css">
+        body {
+            background-color: #444;
+            color: #ddd;
+        }
+        
+        body,
+        input {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 12pt;
+        }
+        
+        h1 {
+            background-color: #333;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            color: #729fcf;
+            font-family: 'Offside', cursive;
+            font-size: 200%;
+            font-weight: normal;
+            text-align: center;
+            text-shadow: 2px 2px 0 #222;
+            padding: 0;
+            line-height: 60px;
+            margin: 0;
+            height: 60px;
+        }
+        
+        .content {
+            margin: 16px auto;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .content > form {
+            text-align: center;
+        }
+        
+        .field {
+            margin: 4px 0;
+        }
+        
+        .field > label {
+            display: inline-block;
+            margin: 0 2px 0 0;
+            width: 100px;
+            text-align: right;
+        }
+        
+        
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>marky</h1>
+        <form name="" action="/login" method="POST" enctype="application/x-www-form-urlencoded">
+            <div class="field"><label>User:</label><input type="text" name="username"/></div>
+            <div class="field"><label>Password:</label><input type="password" name="password"/></div>
+            <input type="submit" value="Submit"/>
+        </form>
+    </div>
+</body>
+</html>

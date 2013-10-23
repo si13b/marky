@@ -8,6 +8,7 @@ marky.request = new Class({
 		'load',
 		'getFolders',
 		'getNote',
+		'logout',
 		'addNote',
 		'addFolder',
 		'deleteNote',
@@ -79,6 +80,10 @@ marky.request = new Class({
 		new Request.JSON({url: '/note/content/get', onSuccess: callback, onError: this._error, onFailure: this._error}).post({
 			note: key
 		});
+	},
+	
+	logout: function(callback) {
+		new Request.JSON({url: '/logout', onSuccess: callback, onError: this._error, onFailure: this._error}).post({});
 	},
 	
 	saveContent: function(noteID, content, callback) {

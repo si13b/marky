@@ -7,6 +7,7 @@ marky.nav = new Class({
 		'_toggleSettings',
 		'_renderSettings',
 		'_addItem',
+		'_logout',
 		'_download',
 		'_upload',
 		'_clickItem',
@@ -70,7 +71,13 @@ marky.nav = new Class({
 				'events': {
 					'click': this._download
 				}
-			}).grab(new Element('i', {'class': 'foundicon-inbox'}))
+			}).grab(new Element('i', {'class': 'foundicon-inbox'})),
+			new Element('div', {
+				'title': 'Logout',
+				'events': {
+					'click': this._logout
+				}
+			}).grab(new Element('i', {'class': 'foundicon-error'})) // TODO Move this elsewhere, find better icon
 		);
 		
 		this._elUpload = new Element('div', {
@@ -260,6 +267,13 @@ marky.nav = new Class({
 					'data-id': newNote._id
 				})
 			)
+		}.bind(this));
+	},
+	
+	_logout: function() {
+		this._db.logout(function() {
+			// ?
+			return;
 		}.bind(this));
 	},
 	

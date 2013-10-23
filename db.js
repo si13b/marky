@@ -2,7 +2,8 @@ var util = require('./util');
 var Db = require('mongodb').Db,
 	MongoClient = require('mongodb').MongoClient,
 	ObjectID = require('mongodb').ObjectID,
-	Server = require('mongodb').Server;
+	Server = require('mongodb').Server,
+	crypto = require('crypto');
 
 // See docs @ http://mongodb.github.io/node-mongodb-native/
 
@@ -22,19 +23,46 @@ MarkyDB.method('connect', function() {
 	this._db.open(function(err, db) {
 		if (!err) {
 			console.log("Connected to mongo!");
+			
+			var users = this._db.collection('users');
+			users.findOne({username: 'admin'}, function(err, item) {
+				if (err || !item) {
+					users.insert({
+							username: 'admin',
+							password: crypto.createHash('md5').update('admin123').digest("hex")
+						}, {w: 1}, function(err, result) {
+							return
+						}
+					);
+					return;
+				}
+			}.bind(this));
+			
 		} else {
 			console.error(err);
 		}
 	}.bind(this));
 });
 
-MarkyDB.method('_getJSON', function(text) {
-	try {
-		return JSON.parse(text);
-	} catch (e) {
-		console.dir(e);
-		return null;
+MarkyDB.method('checkUser', function(username, password, callback) {
+	var users = this._db.collection('users');
+	
+	if (!username || !password) {
+		if (callback) callback(false);
+		return;
 	}
+	
+	var md5 = crypto.createHash('md5').update(password).digest("hex"); // TODO Salt me
+	
+	users.findOne({username: username}, function(err, item) {
+		if (err || !item) {
+			console.error(err);
+			if (callback) callback(false);
+			return;
+		}
+		
+		if (callback) callback(item.password === md5);
+	}.bind(this));
 });
 	
 MarkyDB.method('getTree', function(req, resp) {
@@ -45,7 +73,7 @@ MarkyDB.method('getTree', function(req, resp) {
 	
 	var c = 0, ready = false;
 		
-	folders.find().toArray(function(err, docs) {
+	folders.find({user: req.session.username}).toArray(function(err, docs) {
 		if (err) {
 			console.error(err);
 			resp.end(err); // TODO Ick
@@ -61,7 +89,7 @@ MarkyDB.method('getTree', function(req, resp) {
 			};
 			
 			c++;
-			notes.find({parent: folderItem._id, user: 'admin'}).toArray(function(err, noteDocs) {
+			notes.find({parent: folderItem._id, user: req.session.username}).toArray(function(err, noteDocs) {
 				c--;
 				if (!o.items) o.items = [];
 				
@@ -80,7 +108,7 @@ MarkyDB.method('getTree', function(req, resp) {
 		}.bind(this));
 		
 		c++;
-		notes.find({user: 'admin'}).toArray(function(err, noteDocs) {
+		notes.find({user: req.session.username}).toArray(function(err, noteDocs) {
 			c--;
 			
 			noteDocs.forEach(function(noteItem) {
@@ -106,7 +134,7 @@ MarkyDB.method('dump', function(req, resp) {
 MarkyDB.method('getFolders', function(req, resp) {
 	var folders = this._db.collection('folders');
 	
-	folders.find().toArray(function(err, docs) {
+	folders.find({user: req.session.username}).toArray(function(err, docs) {
 		if (err) {
 			console.error(err);
 			resp.end(err); // TODO Ick
@@ -125,7 +153,7 @@ MarkyDB.method('addNote', function(req, resp) {
 		name: req.body.name,
 		parent: req.body.parent,
 		content: '',
-		user: 'admin' // TODO - Real users
+		user: req.session.username
 	} // TODO key for user
 	
 	// _id generated automatically
@@ -140,7 +168,7 @@ MarkyDB.method('addFolder', function(req, resp) {
 	var o = {
 		name: req.body.name,
 		folder: true,
-		user: 'admin' // TODO - Real users
+		user: req.session.username
 	} // TODO key for user
 	
 	// _id generated automatically
@@ -163,7 +191,7 @@ MarkyDB.method('deleteFolder', function(req, resp) {
 	var folders = this._db.collection('folders');
 	var notes = this._db.collection('notes');
 	
-	notes.find({parent: new ObjectID(req.body.folder), user: 'admin'}).toArray(function(err, noteDocs) {
+	notes.find({parent: new ObjectID(req.body.folder), user: req.session.username}).toArray(function(err, noteDocs) {
 		if (err || !noteDocs) {
 			console.error(err);
 			resp.end(JSON.stringify({
@@ -191,7 +219,7 @@ MarkyDB.method('deleteFolder', function(req, resp) {
 MarkyDB.method('getContent', function(req, resp) {
 	var notes = this._db.collection('notes');
 		
-	notes.findOne({_id: new ObjectID(req.body.note)}, function(err, item) {
+	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
 			console.error(err);
 			resp.end(JSON.stringify({
@@ -207,7 +235,7 @@ MarkyDB.method('getContent', function(req, resp) {
 MarkyDB.method('saveContent', function(req, resp) {
 	var notes = this._db.collection('notes');
 		
-	notes.findOne({_id: new ObjectID(req.body.note)}, function(err, item) {
+	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
 			console.error(err);
 			resp.end(JSON.stringify({
@@ -229,7 +257,7 @@ MarkyDB.method('saveContent', function(req, resp) {
 MarkyDB.method('saveName', function(req, resp) {
 	var notes = this._db.collection('notes');
 		
-	notes.findOne({_id: new ObjectID(req.body.note)}, function(err, item) {
+	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
 			console.error(err);
 			resp.end(JSON.stringify({
@@ -251,7 +279,7 @@ MarkyDB.method('saveName', function(req, resp) {
 MarkyDB.method('renameFolder', function(req, resp) {
 	var folders = this._db.collection('folders');
 		
-	folders.findOne({_id: new ObjectID(req.body.folder)}, function(err, item) {
+	folders.findOne({_id: new ObjectID(req.body.folder), user: req.session.username}, function(err, item) {
 		if (err || !item) {
 			console.error(err);
 			resp.end(JSON.stringify({
@@ -273,7 +301,7 @@ MarkyDB.method('renameFolder', function(req, resp) {
 MarkyDB.method('saveColour', function(req, resp) {
 	var folders = this._db.collection('folders');
 		
-	folders.findOne({_id: new ObjectID(req.body.folder)}, function(err, item) {
+	folders.findOne({_id: new ObjectID(req.body.folder), user: req.session.username}, function(err, item) {
 		if (err || !item) {
 			console.error(err);
 			resp.end(JSON.stringify({
@@ -295,7 +323,7 @@ MarkyDB.method('saveColour', function(req, resp) {
 MarkyDB.method('move', function(req, resp) {
 	var notes = this._db.collection('notes');
 		
-	notes.findOne({_id: new ObjectID(req.body.note)}, function(err, item) {
+	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
 			console.error(err);
 			resp.end(JSON.stringify({
