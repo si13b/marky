@@ -19,7 +19,8 @@ marky.nav = new Class({
 		'_changeColour',
 		'_onChangeName',
 		'_toggleArchive',
-		'_toggleUpload'
+		'_toggleUpload',
+		'_search'
 	],
 
 	options: {
@@ -29,8 +30,9 @@ marky.nav = new Class({
 	},
 	
 	element: null,
-	_elList: null,
-	_elArchiveList: null,
+	_elTree: null,
+	_elSearch: null,
+	_elResults: null,
 	_elOpts: null,
 	_elUpload: null,
 	_db: null,
@@ -51,6 +53,7 @@ marky.nav = new Class({
 	},
 	
 	render: function(tree) {
+		
 		this._elOpts = new Element('div', {
 			'class': 'opts'
 		}).adopt(
@@ -93,7 +96,30 @@ marky.nav = new Class({
 		
 		this._elUpload.grab(elFile);
 		
-		this._elList = new Element('ul', {
+		var elSearchC = new Element('div', {
+			'class': 'search'
+		}).grab(
+			new Element('label', {
+				'text': 'Search'
+			})
+		);
+		
+		this._elSearch = new Element('input', {
+			'type': 'text',
+			'events': {
+				'keydown:pause': this._search
+			}
+		}).inject(elSearchC);
+		
+		this._elResults = new Element('ul', {
+			'class': 'results',
+			'events': {
+				'click:relay(li)': this._clickItem
+			}
+		});
+		
+		this._elTree = new Element('ul', {
+			'class': 'tree shown',
 			'events': {
 				'click:relay(li)': this._clickItem
 			}
@@ -101,11 +127,11 @@ marky.nav = new Class({
 		
 		if (tree && tree.length) {
 			tree.each(function(item) {
-				this._renderItem(item, this._elList);
+				this._renderItem(item, this._elTree);
 			}.bind(this));
 		}
 		
-		this.element.adopt(this._elOpts, this._elUpload, this._elList);
+		this.element.adopt(this._elOpts, this._elUpload, elSearchC, this._elResults, this._elTree);
 	},
 	
 	_renderItem: function(item, elParent) {
@@ -261,7 +287,7 @@ marky.nav = new Class({
 		// TODO get parent ID of context
 		
 		this._db.addNote(this.options.defaultName, null, function(newNote) {
-			this._elList.grab(
+			this._elTree.grab(
 				new Element('li', {
 					text: this.options.defaultName,
 					'data-id': newNote._id
@@ -287,8 +313,10 @@ marky.nav = new Class({
 		if (element.hasClass('folder')) {
 			element.toggleClass('expanded');
 		} else {
-			var elExisting = this.element.getElement('.selected');
-			if (elExisting && elExisting.removeClass) elExisting.removeClass('selected');
+			var elExisting = this.element.getElements('.selected');
+			for (var i = 0; elExisting && i < elExisting.length; i++) {
+				elExisting[i].removeClass('selected');
+			}
 			
 			this._content.setSelected(element.get('data-id'));
 			
@@ -298,14 +326,14 @@ marky.nav = new Class({
 	
 	_addFolder: function(event) {
 		this._db.addFolder(this.options.defaultFolderName, null, function(newFolder) {
-			this._renderItem(newFolder, this._elList);
+			this._renderItem(newFolder, this._elTree);
 		}.bind(this));
 	},
 	
 	_deleteItem: function(item) {
 		if (!item) return;
 		
-		var el = this._elList.getElement('li[data-id="' + item + '"]');
+		var el = this._elTree.getElement('li[data-id="' + item + '"]');
 		if (el) el.destroy();
 	},
 	
@@ -325,9 +353,9 @@ marky.nav = new Class({
 	_moveItem: function(item, moveTo) {
 		if (!item) return;
 		
-		var elMovee = this._elList.getElement('li[data-id="' + item + '"]');
-		var elMoved = this._elList.getElement('li[data-id="' + moveTo + '"] ul');
-		if (!elMoved) elMoved = this._elList;
+		var elMovee = this._elTree.getElement('li[data-id="' + item + '"]');
+		var elMoved = this._elTree.getElement('li[data-id="' + moveTo + '"] ul');
+		if (!elMoved) elMoved = this._elTree;
 		elMovee.inject(elMoved);
 	},
 	
@@ -359,7 +387,7 @@ marky.nav = new Class({
 	},
 	
 	_onChangeName: function(id, name) {
-		var el = this._elList.getElement('li[data-id="' + id + '"]');
+		var el = this._elTree.getElement('li[data-id="' + id + '"]');
 		el.set('html', name);
 	},
 	
@@ -380,6 +408,31 @@ marky.nav = new Class({
 		
 		element.toggleClass('open');
 		this._elUpload.toggleClass('open');
+	},
+	
+	_search: function(event) {
+		var elItems = this._elTree.getElements('li[data-id]:not(.folder)');
+		var searchText = this._elSearch.get('value').toLowerCase();
+		
+		this._elResults.removeClass('shown');
+		this._elTree.addClass('shown');
+		
+		if (!searchText.length) return;
+		
+		this._elResults.getChildren().dispose();
+		var found = false;
+		
+		for (var i = 0; i < elItems.length; i++) {
+			if (elItems[i].get('text').toLowerCase().contains(searchText)) {
+				if (!found) found = true;
+				elItems[i].clone().inject(this._elResults);
+			}
+		}
+		
+		if (found) {
+			this._elResults.addClass('shown');
+			this._elTree.removeClass('shown');
+		}
 	}
 
 });

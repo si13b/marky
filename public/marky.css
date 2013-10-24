@@ -96,7 +96,29 @@ nav > .upload.open {
 	display: block;
 }
 
+nav > .search {
+    margin: 4px 0;
+    padding: 0 8px;
+
+}
+
+nav > .search > label {
+    color: #aaa;
+    font-size: 90%;
+    margin: 0 4px 0 0;
+}
+
+nav > .search > input {
+    background-color: #ccc;
+    border-radius: 4px;
+    border: none;
+    box-shadow: inset 1px 1px 0 #888;
+    float: right;
+
+}
+
 nav > ul {
+	display: none;
 	font-size: 90%;
 	-webkit-flex: 1;
 	flex: 1;
@@ -104,6 +126,10 @@ nav > ul {
 	overflow-y: auto;
 	margin: 8px 0 0;
 	padding: 0;
+}
+
+nav > ul.shown {
+	display: block;
 }
 
 nav ul > li {

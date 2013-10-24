@@ -34,7 +34,8 @@ function auth(req, res, next) {
 		} else {
 			console.log('Login failed for ' + req.body.username);
 			req.session.error = 'Access denied!';
-			res.redirect("login.html");
+			res.end(JSON.stringify({unauthenticated: true}));
+			//res.redirect("login.html");
 		}
 	});
 }
@@ -46,7 +47,7 @@ app.post('/login', auth, function(req, res) {
 app.post('/logout', function(req, res) {
 	if (req.session.username) req.session.username = null;
 	if (req.session.password) req.session.password = null;
-	res.redirect('login.html');
+	res.end(JSON.stringify({unauthenticated: true}));
 });
 app.post('/download', auth, db.dump);
 //app.post('/note/get', db.getNote);
