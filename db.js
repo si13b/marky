@@ -18,7 +18,7 @@ MarkyDB.defaultOptions({
 MarkyDB.field('_db', null);
 
 MarkyDB.method('connect', function() {
-	this._db = new Db(this.options.name, new Server(this.options.host, this.options.port));
+	this._db = new Db(this.options.name, new Server(this.options.host, this.options.port), {safe: false});
 	
 	this._db.open(function(err, db) {
 		if (!err) {
