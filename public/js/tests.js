@@ -35,6 +35,11 @@
 		}, 'Waiting for marky app, or login');
 	}
 	
+	function setACE(text) {
+		F.win.marky.ui._content._ace.setValue(text);
+		//ok(F.eval('marky.ui._content._ace.setValue("' + text + '");'), 'Failed to set the ACE editor value');
+	}
+	
 	test('Test note basics', function() {
 		checkLogin(function() {
 			var count = F('ul.tree li').size();
@@ -49,9 +54,11 @@
 					equal(elAce.text().trim().length, 0, 'ACE editor should now be empty');
 					
 					elAce.click().click().then(function() {
-						$(elAce).text('# This is a title\nAnd this is some text');
-						elAce.type('').then(function() {
-							ok(F('.ace_content').text().contains('# This is a title'), 'ACE editor should have first test note contents');
+						//$(elAce).text('# This is a title\nAnd this is some text');
+						setACE('# This is a title\nAnd this is some text');
+						F.wait(100, function() {
+							console.log(F('.ace_content').text());
+							ok(F('.ace_content').text().contains('This is a title'), 'ACE editor should have first test note contents');
 							F.wait(100, function() {
 								// Create another new note
 								F('.opts > div[title="New note"]').click();
@@ -62,12 +69,12 @@
 									
 									F.wait(200, function() {
 										equal(elAce.text().trim().length, 0, 'ACE editor should now be empty');
-										elAce.click().type('New note two');
+										setACE('New note two');
 										
 										elNew1.click();
 										
 										F.wait(200, function(){
-											ok(F('.ace_content').text().contains('# This is a title'), 'ACE editor should have first test note contents');
+											ok(F('.ace_content').text().contains('This is a title'), 'ACE editor should have first test note contents');
 										});
 									});
 								});
