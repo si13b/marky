@@ -63,28 +63,30 @@ nav > .opts {
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	text-align: center;
-	height: 42px;
-	line-height: 42px;
 }
 
-nav > .opts > div {
+nav > .opts > button {
+    border: 0;
+    box-shadow: none;
+    color: #aaa;
+    height: 42px;
+    padding: 4px 8px;
+    margin: 0;
+}
+
+nav > .opts > button:hover {
+    background-color: #888;
+}
+
+nav > .opts > button > i {
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	display: inline-block;
-	color: #888;
 	cursor: pointer;
-	font-size: 150%;
-	margin: 0;
-	padding: 0;
-	width: 42px;
+	margin: 0 0 0 4px;
+    font-size: 120%;
 	text-align: center;
-}
-nav > .opts > div.open {
-	color: white;
-}
-
-nav > .opts > div:hover {
-	background-color: #666;
+	vertical-align: middle;
 }
 
 nav > .upload {
@@ -357,35 +359,20 @@ nav ul > li.folder > .settings > .colours > .colour.red {
 	background-color: #ef2929;
 }
 
-nav > .archive {
-	background-color: #222;
-	border-top: 2px solid #666;
-	-webkit-display: flex;
-	display: flex;
-	flex-direction: column;
+nav > .actions {
+    margin: 4px 0;
+    text-align: center;
 }
 
-nav > .archive.open {
-	-webkit-flex: 1;
-	flex: 1;
+nav > .actions > a {
+    color: #729fcf;
+    cursor: pointer;
+    font-size: 80%;
+    margin: 0 8px 0;
 }
 
-nav > .archive > .title {
-	color: #888;
-	cursor: pointer;
-	margin: 4px;
-	text-align: center;
-}
-
-nav > .archive > ul {
-	display: none;
-	-webkit-flex: 1;
-	flex: 1;
-	overflow-y: auto;
-}
-
-nav > .archive.open > ul {
-	display: block;
+nav > .actions > a:hover {
+    color: white;
 }
 
 .editor {
@@ -435,8 +422,6 @@ nav > .archive.open > ul {
 	display: flex;
 	padding: 0 0 0 8px;
 	position: relative;
-	height: 42px;
-	line-height: 42px;
 	text-align: left;
 }
 
@@ -444,23 +429,51 @@ nav > .archive.open > ul {
 	flex: 1;
 }
 
-.editor > .toolbar > .alpha > div,
-.editor > .toolbar > .beta > div {
+.editor > .toolbar > .alpha > button,
+.editor > .toolbar > .beta > button {
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
-	display: inline-block;
-	color: #888;
+	box-shadow: none;
+	border: 0;
+	color: #aaa;
 	cursor: pointer;
-	font-size: 150%;
-	margin: 0;
-	padding: 0;
-	width: 42px;
+	margin: 0 2px;
+	padding: 4px;
+	height: 42px;
 	text-align: center;
 }
 
-.editor > .toolbar > .alpha > div:hover,
-.editor > .toolbar > .beta > div:hover {
+.editor > .toolbar > .alpha > button > i,
+.editor > .toolbar > .beta > button > i {
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	display: inline-block;
+	cursor: pointer;
+	margin: 0 0 0 4px;
+    font-size: 120%;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.editor > .toolbar > .alpha > button:hover,
+.editor > .toolbar > .beta > button:hover {
 	background-color: #666;
+}
+
+.editor > .toolbar > .alpha > a,
+.editor > .toolbar > .beta > a {
+    color: #729fcf;
+    cursor: pointer;
+    font-size: 80%;
+    margin: 0 8px 0;
+    height: 42px;
+    line-height: 42px;
+    text-align: center;
+}
+
+.editor > .toolbar > .alpha > a:hover,
+.editor > .toolbar > .beta > a:hover {
+    color: white;
 }
 
 .editor > .toolbar > .manage {

@@ -57,30 +57,20 @@ marky.nav = new Class({
 		this._elOpts = new Element('div', {
 			'class': 'opts'
 		}).adopt(
-			new Element('div', {
+			new Element('button', {
 				'title': 'New note',
+				'html': 'New note',
 				'events': {
 					'click': this._addItem
 				}
 			}).grab(new Element('i', {'class': 'foundicon-page'})),
-			new Element('div', {
+			new Element('button', {
 				'title': 'New folder',
+				'html': 'New folder',
 				'events': {
 					'click': this._addFolder
 				}
-			}).grab(new Element('i', {'class': 'foundicon-folder'})),
-			new Element('div', {
-				'title': 'Download data',
-				'events': {
-					'click': this._download
-				}
-			}).grab(new Element('i', {'class': 'foundicon-inbox'})),
-			new Element('div', {
-				'title': 'Logout',
-				'events': {
-					'click': this._logout
-				}
-			}).grab(new Element('i', {'class': 'foundicon-error'})) // TODO Move this elsewhere, find better icon
+			}).grab(new Element('i', {'class': 'foundicon-folder'}))
 		);
 		
 		this._elUpload = new Element('div', {
@@ -131,7 +121,26 @@ marky.nav = new Class({
 			}.bind(this));
 		}
 		
-		this.element.adopt(this._elOpts, this._elUpload, elSearchC, this._elResults, this._elTree);
+		var elActions = new Element('div', {
+			'class': 'actions'
+		}).adopt(
+			new Element('a', {
+				'title': 'Export data',
+				'html': 'Export data',
+				'events': {
+					'click': this._download
+				}
+			}),
+			new Element('a', {
+				'title': 'Logout',
+				'html': 'Logout',
+				'events': {
+					'click': this._logout
+				}
+			})
+		);
+		
+		this.element.adopt(this._elOpts, this._elUpload, elSearchC, this._elResults, this._elTree, elActions);
 	},
 	
 	_renderItem: function(item, elParent) {

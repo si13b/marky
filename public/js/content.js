@@ -66,14 +66,16 @@ marky.content = new Class({
 			new Element('div', {
 				'class': 'alpha'
 			}).adopt(
-				new Element('div', {
+				new Element('button', {
 					'title': 'Save',
+					'html': 'Save',
 					'events': {
 						'click': this.save
 					}
 				}).grab(new Element('i', {'class': 'foundicon-checkmark'})),
-				new Element('div', {
+				new Element('button', {
 					'title': 'Move to',
+					'html': 'Move to',
 					'events': {
 						'click': this._showFolders
 					}
@@ -84,12 +86,13 @@ marky.content = new Class({
 		this._elToolbar.grab(new Element('div', {
 			'class': 'beta'
 		}).adopt(
-			new Element('div', {
-				'title': 'Delete',
+			new Element('a', {
+				'title': 'Delete note',
+				'html': 'Delete note',
 				'events': {
 					'click': this._delete
 				}
-			}).grab(new Element('i', {'class': 'foundicon-trash'}))
+			})
 		));
 		
 		// TODO Undo

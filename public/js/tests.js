@@ -61,7 +61,7 @@
 			
 		checkLogin(function() {
 			count = F('ul.tree li').size();
-			F('.opts > div[title="New note"]').click();
+			F('.opts > button[title="New note"]').click();
 			F('ul.tree li').size(count + 1, 1000, createFirstNote);
 		});
 			
@@ -90,7 +90,7 @@
 		}
 		
 		function editSecondNote() {
-			F('.opts > div[title="New note"]').click();
+			F('.opts > button[title="New note"]').click();
 			F('ul.tree li').size(count + 2, 1000, function() {
 				elNew2 = F('ul.tree > li:last-child');
 				equal(elNew2.text().trim(), 'New note', 'New note has been created');
@@ -129,12 +129,12 @@
 		function deleteNotes() {
 			elNew1.click();
 			F.wait(200, function() {
-				F('.editor > .toolbar div[title="Delete"]').click();
+				F('.editor > .toolbar a[title="Delete note"]').click();
 				F('li[data-id="' + new1ID + '"]').missing(function() {
 					elNew2 = F('ul.tree li[data-id="' + new2ID + '"]');
 					elNew2.click();
 					F.wait(200, function() {
-						F('.editor > .toolbar div[title="Delete"]').click();
+						F('.editor > .toolbar a[title="Delete note"]').click();
 						F('ul.tree li[data-id="' + new2ID + '"]').missing('The second note has now been removed');
 					});
 				}, 'The first note has now been removed');
@@ -149,9 +149,9 @@
 			
 		checkLogin(function() {
 			count = F('ul.tree li').size();
-			F('.opts > div[title="New note"]').click();
-			F('.opts > div[title="New note"]').click();
-			F('.opts > div[title="New note"]').click();
+			F('.opts > button[title="New note"]').click();
+			F('.opts > button[title="New note"]').click();
+			F('.opts > button[title="New note"]').click();
 			F.wait(200, function() {
 				for (var i = 0; i < 3; i++) noteIDs.push(F('ul.tree > li:nth-child(' + (count + i) + ')').attr('data-id'));
 				
@@ -173,7 +173,7 @@
 		}
 		
 		function createFolder() {
-			F('.opts > div[title="New folder"]').click();
+			F('.opts > button[title="New folder"]').click();
 			F.wait(200, function() {
 				folderID = F('ul.tree > li.folder:last-child').attr('data-id');
 				elFolder = F('ul.tree > li.folder[data-id="' + folderID + '"]');
