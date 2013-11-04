@@ -29,8 +29,7 @@ var marky = {};
 			this._nav = new marky.nav({}, this._content, this._db);
 			
 			Keyboard.manager.addEvents({
-				'ctrl+e': this._nav.focusSearch,
-				'ctrl+f': this._content.openFind
+				'ctrl+e': this._nav.focusSearch
 			});
 		}
 	});

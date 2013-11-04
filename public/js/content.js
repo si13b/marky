@@ -13,6 +13,7 @@ marky.content = new Class({
 		'_changeName',
 		'_delete',
 		'openFind',
+		'_onFindKey',
 		'_findNext',
 		'_findPrevious',
 		'_find',
@@ -61,10 +62,17 @@ marky.content = new Class({
 		this._ace.setShowPrintMargin(false);
 		this._ace.getSession().setMode("ace/mode/markdown");
 		this._ace.getSession().setUseWrapMode(true);
+		// TODO Add ctrl s to global too
 		this._ace.commands.addCommand({
 			name: 'save',
 			bindKey: {win: 'Ctrl-S', mac: 'Command-S'},
 			exec: this.save
+		});
+		this._ace.commands.addCommand({
+			name: 'myCommand',
+			bindKey: {win: 'Ctrl-F',  mac: 'Command-F'},
+			exec: this.openFind,
+			readOnly: true // false if this command should not apply in readOnly mode
 		});
 		
 		this._elToolbar.grab(
@@ -211,7 +219,10 @@ marky.content = new Class({
 		if (this._elFind) return;
 		
 		this._elFindText = new Element('input', {
-			'type': 'text'
+			'type': 'text',
+			'events': {
+				'keypress': this._onFindKey
+			}
 		});
 		
 		this._elFind = new Element('div', {
@@ -229,19 +240,19 @@ marky.content = new Class({
 				'class': 'actions'
 			}).adopt(
 				new Element('button', {
-					'value': 'Find next',
+					'text': 'Find next',
 					'events': {
 						'click': this._findNext
 					}
 				}),
 				new Element('button', {
-					'value': 'Find previous',
+					'text': 'Find previous',
 					'events': {
 						'click': this._findPrevious
 					}
 				}),
 				new Element('button', {
-					'value': 'Cancel',
+					'text': 'Cancel',
 					'events': {
 						'click': this._closeFind
 					}
@@ -249,7 +260,14 @@ marky.content = new Class({
 			)
 		);
 		
-		this._elFind.inject(this.element);
+		$(document.body).grab(this._elFind);
+		
+		this._elFindText.focus();
+	},
+	
+	_onFindKey: function(event) {
+		if (event.key === 'enter') this._findNext();
+		if (event.key === 'esc') this._closeFind();
 	},
 	
 	_findNext: function() {
@@ -261,7 +279,7 @@ marky.content = new Class({
 	},
 	
 	_find: function(isBackwards) {
-		var searchText = this._elFindText.getValue();
+		var searchText = this._elFindText.get('value');
 		
 		if (!searchText || !searchText.length) return;
 		
@@ -277,5 +295,6 @@ marky.content = new Class({
 	_closeFind: function() {
 		this._elFind.dispose();
 		this._elFind = null;
+		this._ace.focus();
 	}
 });
