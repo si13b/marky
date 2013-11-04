@@ -12,8 +12,11 @@ marky.content = new Class({
 		'_toggleMenu',
 		'_changeName',
 		'_delete',
-		'_archive',
-		'_addChild'
+		'openFind',
+		'_findNext',
+		'_findPrevious',
+		'_find',
+		'_closeFind'
 	],
 
 	options: {
@@ -32,6 +35,8 @@ marky.content = new Class({
 	_db: null,
 	_note: null,
 	_elPanel: null,
+	_elFind: null,
+	_elFindText: null,
 
 	initialize: function(options, db) {
 		this.setOptions(options);
@@ -202,11 +207,75 @@ marky.content = new Class({
 		}.bind(this));
 	},
 	
-	_archive: function(event) {
+	openFind: function() {
+		if (this._elFind) return;
 		
+		this._elFindText = new Element('input', {
+			'type': 'text'
+		});
+		
+		this._elFind = new Element('div', {
+			'class': 'find'
+		}).adopt(
+			new Element('div', {
+				'class': 'field'
+			}).adopt(
+				new Element('label', {
+					'text': 'Find: '
+				}),
+				this._elFindText
+			),
+			new Element('div', {
+				'class': 'actions'
+			}).adopt(
+				new Element('button', {
+					'value': 'Find next',
+					'events': {
+						'click': this._findNext
+					}
+				}),
+				new Element('button', {
+					'value': 'Find previous',
+					'events': {
+						'click': this._findPrevious
+					}
+				}),
+				new Element('button', {
+					'value': 'Cancel',
+					'events': {
+						'click': this._closeFind
+					}
+				})
+			)
+		);
+		
+		this._elFind.inject(this.element);
 	},
 	
-	_addChild: function(event) {
+	_findNext: function() {
+		this._find(false);
+	},
+	
+	_findPrevious: function() {
+		this._find(true);
+	},
+	
+	_find: function(isBackwards) {
+		var searchText = this._elFindText.getValue();
 		
+		if (!searchText || !searchText.length) return;
+		
+		this._ace.find(searchText, {
+			backwards: isBackwards,
+			wrap: false,
+			caseSensitive: false,
+			wholeWord: false,
+			regExp: false
+		});
+	},
+	
+	_closeFind: function() {
+		this._elFind.dispose();
+		this._elFind = null;
 	}
 });

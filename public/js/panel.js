@@ -5,7 +5,8 @@ marky.panel = new Class({
 		'toElement',
 		'_render',
 		'show',
-		'close'
+		'close',
+		'openFind'
 	],
 
 	options: {

@@ -20,6 +20,7 @@ marky.nav = new Class({
 		'_onChangeName',
 		'_toggleArchive',
 		'_toggleUpload',
+		'focusSearch',
 		'_search'
 	],
 
@@ -417,6 +418,10 @@ marky.nav = new Class({
 		
 		element.toggleClass('open');
 		this._elUpload.toggleClass('open');
+	},
+	
+	focusSearch: function(event) {
+		this._elSearch.focus();
 	},
 	
 	_search: function(event) {

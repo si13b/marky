@@ -1,7 +1,7 @@
 var marky = {};
 
 (function () {
-	var ui = new Class({
+	var UI = new Class({
 		Implements: [Options, Events],
 	
 		Binds: [
@@ -24,15 +24,18 @@ var marky = {};
 		},
 		
 		render: function() {
-			
-			
 			this._db = new marky.request();
 			this._content = new marky.content({}, this._db);
 			this._nav = new marky.nav({}, this._content, this._db);
+			
+			Keyboard.manager.addEvents({
+				'ctrl+e': this._nav.focusSearch,
+				'ctrl+f': this._content.openFind
+			});
 		}
 	});
 
 	window.addEvent('domready', function() {
-		marky.ui = new ui();
+		marky.ui = new UI();
 	});
 })();
