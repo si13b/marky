@@ -145,7 +145,8 @@
 	test('Folder creation and deletion', function() {
 		var noteIDs = [],
 			folderID = null,
-			elFolder = null;
+			elFolder = null,
+			NOTE_COUNT = 3;
 			
 		checkLogin(function() {
 			count = F('ul.tree li').size();
@@ -153,7 +154,7 @@
 			F('.opts > button[title="New note"]').click();
 			F('.opts > button[title="New note"]').click();
 			F.wait(200, function() {
-				for (var i = 0; i < 3; i++) noteIDs.push(F('ul.tree > li:nth-child(' + (count + i) + ')').attr('data-id'));
+				for (var i = 1; i <= NOTE_COUNT; i++) noteIDs.push(F('ul.tree > li:nth-child(' + (count + i) + ')').attr('data-id'));
 				
 				renameNote(1);
 			});
@@ -165,7 +166,7 @@
 				massDeleteAction(F('.editor.selected > .title > input')).click().type('Note number ' + number + '[enter]');
 				setACE('# A note!\n* Note number ' + number);
 				F.wait(200, function() {
-					if (number >= 3) createFolder();
+					if (number >= NOTE_COUNT) createFolder();
 					else renameNote(number + 1);
 				});
 			});
@@ -179,6 +180,53 @@
 				elFolder = F('ul.tree > li.folder[data-id="' + folderID + '"]');
 				elFolder.click().hasClass('expanded', true);
 				
+				elFolder.then(moveItem);
+			});
+		}
+		
+		// TODO this part doesn't seem to be working
+		function moveItem(index) {
+			if (!index) index = 0;
+			
+			if (index >= NOTE_COUNT) {
+				deleteFolder();
+				return;
+			}
+			
+			F('ul.tree > li[data-id="' + noteIDs[index] + '"]').visible().click();
+			
+			F.wait(200, function() {
+				F('.editor > .toolbar button[title="Move to"]').visible().click();
+				F.wait(200, function() {
+					F('.panel > ul > li[data-id="' + index + '"]').visible().click();
+					moveItem(index + 1);
+				});
+			});
+		}
+		
+		function deleteFolder() {
+			for (var i = 0; i < NOTE_COUNT; i++) elFolder.find('ul > li[data-id="' + noteIDs[i] + '"]').visible();
+			elFolder.then(function() {
+				elFolder.find('.setting').visible().click();
+				elFolder.find('.settings.shown').visible().then(function() {
+					elFolder.find('.settings.shown > button[title="Delete"]').visible().click();
+					elFolder.missing().then(deleteItem);
+				});
+			});
+		}
+		
+		function deleteItem(index) {
+			if (!index) index = 0;
+			
+			if (index >= NOTE_COUNT) return;
+			
+			F('ul.tree > li[data-id="' + noteIDs[index] + '"]').visible().click();
+			
+			F.wait(200, function() {
+				F('.editor > .toolbar a[title="Delete note"]').visible().click();
+				F('ul.tree li[data-id="' + index + '"]').missing('The second note has now been removed').then(function() {
+					deleteItem(index + 1);
+				});
 			});
 		}
 	});
