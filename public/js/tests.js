@@ -153,17 +153,17 @@
 			F('.opts > button[title="New note"]').click();
 			F('.opts > button[title="New note"]').click();
 			F('.opts > button[title="New note"]').click();
-			F.wait(200, function() {
-				for (var i = 1; i <= NOTE_COUNT; i++) noteIDs.push(F('ul.tree > li:nth-child(' + (count + i) + ')').attr('data-id'));
+			F.wait(400, function() {
+				for (var i = 0; i < NOTE_COUNT; i++) noteIDs.push(F('ul.tree > li:nth-child(' + ((count + 1) + i) + ')').attr('data-id'));
 				
 				renameNote(1);
 			});
 		});
 		
 		function renameNote(number) {
-			F('li[data-id="' + noteIDs[number - 1] + '"]').click();
+			F('li[data-id="' + noteIDs[number - 1] + '"]').visible().click();
 			F.wait(200, function() {
-				massDeleteAction(F('.editor.selected > .title > input')).click().type('Note number ' + number + '[enter]');
+				massDeleteAction(F('.editor.selected > .title > input')).visible().click().type('Note number ' + number + '[enter]');
 				setACE('# A note!\n* Note number ' + number);
 				F.wait(200, function() {
 					if (number >= NOTE_COUNT) createFolder();
@@ -174,13 +174,15 @@
 		}
 		
 		function createFolder() {
-			F('.opts > button[title="New folder"]').click();
+			F('.opts > button[title="New folder"]').visible().click();
 			F.wait(200, function() {
 				folderID = F('ul.tree > li.folder:last-child').attr('data-id');
 				elFolder = F('ul.tree > li.folder[data-id="' + folderID + '"]');
-				elFolder.click().hasClass('expanded', true);
+				elFolder.visible().click().hasClass('expanded', true);
 				
-				elFolder.then(moveItem);
+				elFolder.then(function() {
+					moveItem(0);
+				});
 			});
 		}
 		
@@ -198,8 +200,10 @@
 			F.wait(200, function() {
 				F('.editor > .toolbar button[title="Move to"]').visible().click();
 				F.wait(200, function() {
-					F('.panel > ul > li[data-id="' + index + '"]').visible().click();
-					moveItem(index + 1);
+					F('.panel').visible();
+					F('.panel > ul > li[data-id="' + noteIDs[index] + '"]').visible().click().then(function() {
+						moveItem(index + 1);
+					});
 				});
 			});
 		}

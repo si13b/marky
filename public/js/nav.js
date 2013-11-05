@@ -265,9 +265,8 @@ marky.nav = new Class({
 	
 	_download: function() {
 		this._db.dump(function(content) {
-			var blob = new Blob([JSON.encode(content)], {type: "text/plain"}); // pass a useful mime type here
+			var blob = new Blob([content], {type: "application/zip"});
 			var url = URL.createObjectURL(blob);
-			//var url = 'data:text/plain,' + encodeURI(JSON.encode(content));
 			new marky.msg({
 				timeout: 10000,
 				buttons: ['close']

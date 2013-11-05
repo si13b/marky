@@ -3,7 +3,8 @@ var Db = require('mongodb').Db,
 	MongoClient = require('mongodb').MongoClient,
 	ObjectID = require('mongodb').ObjectID,
 	Server = require('mongodb').Server,
-	crypto = require('crypto');
+	crypto = require('crypto'),
+	Zip = require('node-zip');
 
 // See docs @ http://mongodb.github.io/node-mongodb-native/
 
@@ -128,7 +129,17 @@ MarkyDB.method('getTree', function(req, resp) {
 });
 
 MarkyDB.method('dump', function(req, resp) {
-	resp.end("Download!\n");
+	var notes = this._db.collection('notes');
+	
+	notes.find({user: req.session.username}).toArray(function(err, noteDocs) {
+		var zip = new Zip();
+		
+		noteDocs.forEach(function(noteItem) {
+			zip.file(noteItem.name + '.md', noteItem.content);
+		}.bind(this))
+		
+		resp.end(zip.generate({base64: false, compression: 'DEFLATE'}), 'binary');
+	});
 });
 
 MarkyDB.method('getFolders', function(req, resp) {

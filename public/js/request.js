@@ -30,18 +30,21 @@ marky.request = new Class({
 	},
 	
 	dump: function(callback) {
-		new Request.JSON({url: '/download', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
+		var oReq = new XMLHttpRequest();
+		oReq.open("POST", "/download", true);
+		oReq.responseType = "arraybuffer";
+
+		oReq.onload = function(oEvent) {
 			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({});
+			if (callback) callback(oReq.response);
+		};
+		
+		oReq.send();
 	},
 	
 	getTree: function(callback) {
 		new Request.JSON({url: '/folder/tree', onSuccess: function(result) {
+			// TODO Should use HTTP response codes for unauthenticated
 			if (result.unauthenticated) {
 				window.location = 'login.html';
 				return;
