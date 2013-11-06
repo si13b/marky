@@ -21,6 +21,7 @@ marky.content = new Class({
 	],
 
 	options: {
+		autosave: 60000
 		//onName
 		//onDelete
 		//onMove
@@ -38,6 +39,7 @@ marky.content = new Class({
 	_elPanel: null,
 	_elFind: null,
 	_elFindText: null,
+	_timer: null,
 
 	initialize: function(options, db) {
 		this.setOptions(options);
@@ -54,6 +56,7 @@ marky.content = new Class({
 		this._elAce = $$('#aceeditor');
 		
 		this._render();
+		this._timer = this.save.periodical(this.options.autosave);
 	},
 	
 	_render: function() {
@@ -72,7 +75,7 @@ marky.content = new Class({
 			name: 'myCommand',
 			bindKey: {win: 'Ctrl-F',  mac: 'Command-F'},
 			exec: this.openFind,
-			readOnly: true // false if this command should not apply in readOnly mode
+			readOnly: true
 		});
 		
 		this._elToolbar.grab(

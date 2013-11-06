@@ -4,6 +4,7 @@ var Db = require('mongodb').Db,
 	ObjectID = require('mongodb').ObjectID,
 	Server = require('mongodb').Server,
 	crypto = require('crypto'),
+	bcrypt = require('bcrypt-nodejs'),
 	Zip = require('node-zip');
 
 // See docs @ http://mongodb.github.io/node-mongodb-native/
@@ -24,21 +25,6 @@ MarkyDB.method('connect', function() {
 	this._db.open(function(err, db) {
 		if (!err) {
 			console.log("Connected to mongo!");
-			
-			var users = this._db.collection('users');
-			users.findOne({username: 'admin'}, function(err, item) {
-				if (err || !item) {
-					users.insert({
-							username: 'admin',
-							password: crypto.createHash('md5').update('admin123').digest("hex")
-						}, {w: 1}, function(err, result) {
-							return
-						}
-					);
-					return;
-				}
-			}.bind(this));
-			
 		} else {
 			console.error(err);
 		}
@@ -53,7 +39,8 @@ MarkyDB.method('checkUser', function(username, password, callback) {
 		return;
 	}
 	
-	var md5 = crypto.createHash('md5').update(password).digest("hex"); // TODO Salt me
+	var hash = bcrypt.hashSync(password);
+	//var md5 = crypto.createHash('md5').update(password).digest("hex");
 	
 	users.findOne({username: username}, function(err, item) {
 		if (err || !item) {
@@ -62,10 +49,35 @@ MarkyDB.method('checkUser', function(username, password, callback) {
 			return;
 		}
 		
-		if (callback) callback(item.password === md5);
+		if (callback) callback(bcrypt.compareSync(item.password, hash));
 	}.bind(this));
 });
-	
+
+MarkyDB.method('createUser', function(req, resp) {
+	var users = this._db.collection('users');
+	users.findOne({username: 'admin'}, function(err, item) {
+		if (err || !item) {
+			users.insert({
+					username: req.body.username,
+					password: bcrypt.hashSync(req.body.password),// crypto.createHash('md5').update(req.body.password).digest("hex"),
+					email: req.body.email,
+					firstname: req.body.firstname,
+					surname: req.body.surname
+				}, {w: 1}, function(err, result) {
+					if (err) {
+						console.error(err.stack);
+						resp.end(500, "Error creating user");
+					}
+					
+					resp.end(JSON.stringify(result));
+				}
+			);
+		} else {
+			resp.end(500, "Error creating user; already exists");
+		}
+	}.bind(this));
+});
+
 MarkyDB.method('getTree', function(req, resp) {
 	var folders = this._db.collection('folders');
 	var notes = this._db.collection('notes');
@@ -76,8 +88,8 @@ MarkyDB.method('getTree', function(req, resp) {
 		
 	folders.find({user: req.session.username}).toArray(function(err, docs) {
 		if (err) {
-			console.error(err);
-			resp.end(err); // TODO Ick
+			console.error(err.stack);
+			resp.end(500, "Error retrieving tree"); // TODO Ick
 			return;
 		}
 		
@@ -147,8 +159,8 @@ MarkyDB.method('getFolders', function(req, resp) {
 	
 	folders.find({user: req.session.username}).toArray(function(err, docs) {
 		if (err) {
-			console.error(err);
-			resp.end(err); // TODO Ick
+			console.error(err.stack);
+			resp.end(500, "Error retrieving folders"); // TODO Ick
 			return;
 		}
 		
@@ -204,10 +216,8 @@ MarkyDB.method('deleteFolder', function(req, resp) {
 	
 	notes.find({parent: new ObjectID(req.body.folder), user: req.session.username}).toArray(function(err, noteDocs) {
 		if (err || !noteDocs) {
-			console.error(err);
-			resp.end(JSON.stringify({
-				error: err || 'Object is null'
-			}));
+			console.error(err.stack);
+			resp.end(500, "Could not delete folder");
 			return;
 		}
 		
@@ -232,10 +242,8 @@ MarkyDB.method('getContent', function(req, resp) {
 		
 	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err);
-			resp.end(JSON.stringify({
-				error: err || 'Object is null'
-			}));
+			console.error(err.stack);
+			resp.end(500, "Could not retrieve content");
 			return;
 		}
 		
@@ -248,7 +256,7 @@ MarkyDB.method('saveContent', function(req, resp) {
 		
 	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err);
+			console.error(err.stack);
 			resp.end(JSON.stringify({
 				error: err || 'Object is null'
 			}));
@@ -270,10 +278,8 @@ MarkyDB.method('saveName', function(req, resp) {
 		
 	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err);
-			resp.end(JSON.stringify({
-				error: err || 'Object is null'
-			}));
+			console.error(err.stack);
+			resp.end(500, "Could not save note name");
 			return;
 		}
 		
@@ -292,10 +298,8 @@ MarkyDB.method('renameFolder', function(req, resp) {
 		
 	folders.findOne({_id: new ObjectID(req.body.folder), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err);
-			resp.end(JSON.stringify({
-				error: err || 'Object is null'
-			}));
+			console.error(err.stack);
+			resp.end(500, "Could not rename folder");
 			return;
 		}
 		
@@ -314,7 +318,7 @@ MarkyDB.method('saveColour', function(req, resp) {
 		
 	folders.findOne({_id: new ObjectID(req.body.folder), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err);
+			console.error(err.stack);
 			resp.end(JSON.stringify({
 				error: err || 'Object is null'
 			}));
@@ -336,10 +340,8 @@ MarkyDB.method('move', function(req, resp) {
 		
 	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err);
-			resp.end(JSON.stringify({
-				error: err || 'Object is null'
-			}));
+			console.error(err.stack);
+			resp.end(500, "Could not move note");
 			return;
 		}
 		

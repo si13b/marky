@@ -42,7 +42,7 @@ function auth(req, res, next) {
 
 app.post('/login', auth, function(req, res) {
 	console.log('redirecting to app index')
-	res.redirect('index.html');
+	res.redirect('app.html');
 });
 app.post('/logout', function(req, res) {
 	if (req.session.username) req.session.username = null;

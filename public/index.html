@@ -6,33 +6,164 @@
     <link href="foundation-icons/stylesheets/general_foundicons.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Offside' rel='stylesheet' type='text/css'>
     <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel='stylesheet' type='text/css'>
-    <link href="marky.css" rel="stylesheet" type="text/css">
-    <!-- TODO Yuck -->
-    <script src="libjs/mootools-core-1.4.5-full-nocompat-yc.js" type="text/javascript" charset="utf-8"></script>
-    <script src="libjs/mootools-more-1.4.0.1.js" type="text/javascript" charset="utf-8"></script>
-    <script src="libjs/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="js/ui.js" type="text/javascript" charset="utf-8"></script>
-    <script src="js/nav.js" type="text/javascript" charset="utf-8"></script>
-    <script src="js/content.js" type="text/javascript" charset="utf-8"></script>
-    <script src="js/request.js" type="text/javascript" charset="utf-8"></script>
-    <script src="js/msg.js" type="text/javascript" charset="utf-8"></script>
-    <script src="js/panel.js" type="text/javascript" charset="utf-8"></script>
+    <style type="text/css">
+        body {
+            background-color: #444;
+            color: #ddd;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body,
+        input {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16pt;
+        }
+        
+        section {
+            padding: 32px 0;
+        }
+        
+        section.dark {
+            background-color: #333;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.8), 0 -1px 1px rgba(0,0,0,0.8);
+        }
+        
+        h1 {
+            /*background-color: #333;*/
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            color: #729fcf;
+            font-family: 'Offside', cursive;
+            font-size: 300%;
+            font-weight: normal;
+            text-shadow: 2px 2px 0 #222;
+            padding: 0;
+            line-height: 60px;
+            margin: 0;
+            height: 60px;
+        }
+        
+        a {
+            color: #729fcf;
+        }
+        
+        header {
+            position: relative;
+        }
+        
+        header > .title {
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            display: inline-block;
+            vertical-align: top;
+            width: 60%;
+        }
+        
+        header > .title > h2 {
+            font-size: 140%;
+            font-weight: normal;
+            margin: 4px 0 0;
+        }
+        
+        header > .actions {
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            display: inline-block;
+            text-align: right;
+            vertical-align: top;
+            width: 38%;
+        }
+        
+        header > .actions button.create {
+            background-color: #8ae234;
+            margin: 0 8px 0 0;
+        }
+        
+        header > .actions button {
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0.2) 100%);
+            background-color: #ccc;
+            box-shadow: 1px 1px 0 rgba(255,255,255,0.4) inset, 1px 1px 0 rgba(0,0,0,0.4);
+            border: 0;
+            border-radius: 8px;
+            padding: 4px;
+            font-size: 110%;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+        }
+        
+        .content {
+            margin: 0 auto;
+            max-width: 1000px;
+            width: 100%;
+        }
+        
+        .content > p {
+            color: #aaa;
+        }
+        
+        .field {
+            margin: 4px 0;
+        }
+        
+        .field > label {
+            display: inline-block;
+            font-size: 80%;
+            margin: 0 2px 0 0;
+            width: 100px;
+            text-align: right;
+        }
+        
+        .field > label > input {
+            font-size: 80%;
+        }
+        
+        footer {
+            font-size: 70%;
+            text-align: center;
+        }
+        
+    </style>
 </head>
 <body>
-    <nav>
-        <h1>
-            marky
-        </h1>
-    </nav>
-    <div class="editor" >
-        <div class="title">
-            <input type="text" />
+    <section>
+        <div class="content">
+            <header>
+                <div class="title">
+                    <h1>marky</h1>
+                    <h2>Hierarchial Markdown notes for coders</h2>
+                </div>
+                <div class="actions">
+                    
+                    <form name="" action="/login" method="POST" enctype="application/x-www-form-urlencoded">
+                        <div class="field"><label>User:</label><input type="text" name="username"/></div>
+                        <div class="field"><label>Password:</label><input type="password" name="password"/></div>
+                        <button class="create">Create account</button><button type="submit"/>Sign in</button>
+                    </form>
+                </div>
+            </header>
         </div>
-        <div class="toolbar"></div>
-        <div id="aceeditor"></div>
-    </div>
-    <div class="blank">
-        Create or select a note to get started
-    </div>
+    </section>
+    <section class="dark">
+        <div class="content">
+            <p>Searchable and structured storage of notes for quick and easy access</p>
+        </div>
+    </section>
+    <section>
+        <div class="content">
+            <p>Built upon open source software</p>
+        </div>
+    </section>
+    <section class="dark">
+        <div class="content">
+            <p>Complete access to your data, at any time.</p>
+        </div>
+    </section>
+    <section>
+        <div class="content">
+            <footer>
+                <a href="https://github.com/si13b/marky">Github</a>
+            </footer>
+        </div>
+    </section>
 </body>
 </html>
