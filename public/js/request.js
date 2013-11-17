@@ -3,6 +3,7 @@ marky.request = new Class({
 
 	Binds: [
 		'_error',
+		'_failure',
 		'getTree',
 		'dump',
 		'load',
@@ -25,8 +26,16 @@ marky.request = new Class({
 		this.setOptions(options);
 	},
 	
-	_error: function(event) {
-		this.fireEvent('error', [event]);
+	_error: function() {
+		this.fireEvent('error', []);
+	},
+	
+	_failure: function(event) {
+		if (event.status === 301) {
+			window.location = event.responseText;
+		} else {
+			this.fireEvent('error', [event]);
+		}
 	},
 	
 	dump: function(callback) {
@@ -51,7 +60,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({});
+		}, onError: this._error, onFailure: this._failure}).post({});
 	},
 	
 	getFolders: function(callback) {
@@ -62,7 +71,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({});
+		}, onError: this._error, onFailure: this._failure}).post({});
 	},
 	
 	addFolder: function(name, parentID, callback) {
@@ -73,7 +82,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			name: name,
 			parent: parentID || undefined,
 			folder: true
@@ -88,7 +97,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			folder: folderID,
 			colour: colour
 		});
@@ -102,7 +111,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			name: name,
 			parent: parentID || undefined,
 			content: ''
@@ -117,7 +126,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			note: noteID
 		});
 	},
@@ -130,7 +139,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			folder: folderID
 		});
 	},
@@ -143,7 +152,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			note: key
 		});
 	},
@@ -156,7 +165,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({});
+		}, onError: this._error, onFailure: this._failure}).post({});
 	},
 	
 	saveContent: function(noteID, content, callback) {
@@ -167,7 +176,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			note: noteID,
 			content: content
 		});
@@ -181,7 +190,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			note: noteID,
 			name: name
 		});
@@ -195,7 +204,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			folder: folderID,
 			name: name
 		});
@@ -209,7 +218,7 @@ marky.request = new Class({
 			}
 			
 			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._error}).post({
+		}, onError: this._error, onFailure: this._failure}).post({
 			note: noteID,
 			parent: newParent
 		});
