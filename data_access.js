@@ -82,13 +82,13 @@ DataAccess.method('updateUser', function(githubUser, token, callback) {
 				email: githubUser.email,
 				name: githubUser.name
 			}, {w: 1}, function(err, result) {
-				if (err) {
+				if (err || !result || !result.length) {
 					console.error(err.stack);
 					resp.end(500, "Error creating user");
 					return;
 				}
 				
-				this._doUpdateUser(result, githubUser, token, callback);
+				this._doUpdateUser(result[0], githubUser, token, callback);
 			}.bind(this));
 			
 			return;
