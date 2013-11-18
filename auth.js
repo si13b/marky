@@ -1,8 +1,7 @@
 var util = require('./util');
 
 var https = require('https'),
-	querystring = require('querystring'),
-	deferred = require('deferred');
+	querystring = require('querystring');
 
 // See docs @ http://mongodb.github.io/node-mongodb-native/
 
@@ -26,12 +25,19 @@ Auth.method('setDataAccess', function(newDataAccess) {
 
 Auth.method('check', function(req, res, next) {
 	if (!req.session.token && req.query.code) {
-		var token = null;
 		console.log('Retrieving token for temp code: ' + req.query.code);
 		
-		deferred.promisify(this.requestToken)(req.query.code)
-		.then(deferred.promisify(function (response, callback) {
-			token = response.access_token;
+		this.requestToken(req.query.code, function (err, response) {
+			if (err) {
+				console.error('Error has occured: ' + err);
+				if (err.request && err.request.uri) console.error('href: ' + err.request.uri.href);
+				
+				if (req.method === 'GET') res.redirect('index.html');
+				else res.send(301, 'index.html');
+				return;
+			}
+			
+			var token = response.access_token;
 			
 			if (!token) {
 				console.error('Token was not provided?!');
@@ -41,35 +47,36 @@ Auth.method('check', function(req, res, next) {
 				return;
 			}
 			
-			console.log('Token received');
+			console.log('Token recevied');
 			
 			if (!req.session.token) req.session.token = token;
 			
-			callback(req.session.token);
-		}.bind(this)))
-		.then(deferred.promisify(this.getUser))
-		.then(deferred.promisify(function(response, callback) {
-			console.log('User: ' + response.login);
+			this.user(req.session.token, function(err, response) {
+				if (err || !response.login) {
+					console.error(err);
+					
+					if (req.method === 'GET') res.redirect('index.html');
+					else res.send(301, 'index.html');
+					return;
+				}
+				
+				console.log('User: ' + response.login);
+				
+				req.session.username = response.login;
+				
+				this._dataAccess.updateUser(response, token, function(err, result) {
+					if (err || !result) {
+						console.error(err);
 			
-			req.session.username = response.login;
-			
-			callback(response, token);
-		}.bind(this)))
-		.then(deferred.promisify(this._dataAccess.updateUser, 2))
-		.then(deferred.promisify(function(result, callback) {
-			next();
-			callback();
-		}.bind(this)))
-		.done(function(result) {
-			console.log('Token granted');
-		}, function(err) {
-			console.error('Error has occured: ' + err);
-			if (err.request && err.request.uri) console.error('href: ' + err.request.uri.href);
-			
-			if (req.method === 'GET') res.redirect('index.html');
-			else res.send(301, 'index.html');
-		});
-		
+						if (req.method === 'GET') res.redirect('index.html');
+						else res.send(301, 'index.html');
+						return;
+					}
+					
+					next();
+				});
+			}.bind(this));
+		}.bind(this));
 	} else if (req.session.token) {
 		console.log('Existing token found');
 		
@@ -114,6 +121,8 @@ Auth.method('requestToken', function(tempCode, callback) {
 	var req = https.request(options, function(res) {
 		res.setEncoding('utf8');
 		res.on('data', function (chunk) {
+			console.log('Response: ' + chunk);
+			
 			if (!chunk || !chunk.length) {
 				callback(new Error("Empty data"), null);
 				return;
@@ -131,7 +140,7 @@ Auth.method('requestToken', function(tempCode, callback) {
 	req.end();
 });
 
-Auth.method('getUser', function(token, callback) {
+Auth.method('user', function(token, callback) {
 	var data = querystring.stringify({
 		access_token: token
 	});

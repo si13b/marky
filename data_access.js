@@ -4,8 +4,7 @@ var Db = require('mongodb').Db,
 	ObjectID = require('mongodb').ObjectID,
 	Server = require('mongodb').Server,
 	crypto = require('crypto'),
-	Zip = require('node-zip'),
-	deferred = require('deferred');
+	Zip = require('node-zip');
 
 // See docs @ http://mongodb.github.io/node-mongodb-native/
 
@@ -75,33 +74,33 @@ DataAccess.method('checkUser', function(username, token, callback) {
 
 DataAccess.method('updateUser', function(githubUser, token, callback) {
 	var users = this._db.collection('users');
-	var findOneUser = deferred.promisify(users.findOne).bind(users),
-		insertUser = deferred.promisify(users.insert).bind(users);
-	
-	findOneUser({username: githubUser.login})(function(item) {
-		this._doUpdateUser(item, githubUser, token, callback);
-	}.bind(this), function(err) {
-		insertUser({
-			username: githubUser.login,
-			github_id: githubUser.id,
-			email: githubUser.email,
-			name: githubUser.name
-		}, {w: 1})(function(result) {
-			this._doUpdateUser(result, githubUser, token, callback);
-		}.bind(this), function(err) {
-			console.error(err.stack);
-			resp.end(500, "Error creating user");
+	users.findOne({username: githubUser.login}, function(err, item) {
+		if (err || !item) {
+			users.insert({
+				username: githubUser.login,
+				github_id: githubUser.id,
+				email: githubUser.email,
+				name: githubUser.name
+			}, {w: 1}, function(err, result) {
+				if (err) {
+					console.error(err.stack);
+					resp.end(500, "Error creating user");
+					return;
+				}
+				
+				this._doUpdateUser(result, githubUser, token, callback);
+			}.bind(this));
+			
 			return;
-		}.bind(this));
+		}
 		
-		return;
+		this._doUpdateUser(item, githubUser, token, callback);
 	}.bind(this));
 });
 
 DataAccess.method('_doUpdateUser', function(user, githubUser, token, callback) {
 	var users = this._db.collection('users'),
-		hashes = this._db.collection('hashes'),
-		insertHash = deferred.promisify(hashes.insert).bind(hashes);
+		hashes = this._db.collection('hashes');
 	
 	user.salt = crypto.randomBytes(256);
 	users.save(user);
@@ -109,14 +108,16 @@ DataAccess.method('_doUpdateUser', function(user, githubUser, token, callback) {
 	var sha512 = crypto.createHash('sha512');
 	sha512.update(user.salt + token);
 	
-	insertHash({
+	hashes.insert({
 		hash: sha512.digest('hex')
-	}, {w: 1})(function(result) {
-		callback(null, result);
-	}, function(err) {
-		console.error(err.stack);
-		resp.end(500, "Error creating user");
-		return;
+	}, {w: 1}, function(err, result) {
+		if (err) {
+			console.error(err.stack);
+			resp.end(500, "Error creating user");
+			return;
+		}
+		
+		if (callback) callback(err, true);
 	});
 });
 
