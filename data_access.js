@@ -315,7 +315,7 @@ DataAccess.method('saveContent', function(req, resp) {
 		
 	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err.stack);
+			console.error(err);
 			resp.end(JSON.stringify({
 				error: err || 'Object is null'
 			}));
