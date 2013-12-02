@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="icon" type="image/png" href="marky.png">
+    <title>marky</title>
+    <link href="foundation-icons/stylesheets/general_foundicons.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Offside' rel='stylesheet' type='text/css'>
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel='stylesheet' type='text/css'>
+    <style type="text/css">
+        body {
+            background-color: #444;
+            color: #ddd;
+        }
+        
+        body,
+        input {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 12pt;
+        }
+        
+        h1 {
+            background-color: #333;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            color: #729fcf;
+            font-family: 'Offside', cursive;
+            font-size: 200%;
+            font-weight: normal;
+            text-align: center;
+            text-shadow: 2px 2px 0 #222;
+            padding: 0;
+            line-height: 60px;
+            margin: 0;
+            height: 60px;
+        }
+        
+        .content {
+            margin: 16px auto;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .content > form {
+            text-align: center;
+        }
+        
+        .field {
+            margin: 4px 0;
+        }
+        
+        .field > label {
+            display: inline-block;
+            margin: 0 4px 0 0;
+            text-align: right;
+            width: 160px;
+        }
+        
+        .field > label > input {
+        }
+        
+        button {
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0.2) 100%);
+            background-color: #ccc;
+            box-shadow: 1px 1px 0 rgba(255,255,255,0.4) inset, 1px 1px 0 rgba(0,0,0,0.4);
+            border: 0;
+            border-radius: 8px;
+            color: #000;
+            padding: 4px;
+            font-size: 110%;
+            text-decoration: none;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+        }
+        
+        
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>marky</h1>
+        <form name="" action="/signup" method="POST" enctype="application/x-www-form-urlencoded">
+            <div class="field"><label>User:</label><input type="text" name="username"/></div>
+            <div class="field"><label>Password:</label><input type="password" name="password"/></div>
+            <div class="field"><label>Confirm password:</label><input type="password" name="confirm"/></div>
+            <div class="field"><label>Name:</label><input type="text" name="name"/></div>
+            <div class="field"><label>Email:</label><input type="text" name="email"/></div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
