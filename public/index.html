@@ -75,19 +75,22 @@
             width: 38%;
         }
         
-        header > .actions button.create {
+        header > .actions a.create {
             background-color: #8ae234;
             margin: 0 8px 0 0;
         }
         
-        header > .actions button {
+        header > .actions button,
+        header > .actions a {
             background: linear-gradient(0deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0.2) 100%);
             background-color: #ccc;
             box-shadow: 1px 1px 0 rgba(255,255,255,0.4) inset, 1px 1px 0 rgba(0,0,0,0.4);
             border: 0;
             border-radius: 8px;
+            color: #000;
             padding: 4px;
             font-size: 110%;
+            text-decoration: none;
             text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
         }
         
@@ -133,12 +136,11 @@
                     <h2>Hierarchial Markdown notes for coders</h2>
                 </div>
                 <div class="actions">
-                    <a href="/login">Login</a>
-                    <!--<form name="" action="/login" method="POST" enctype="application/x-www-form-urlencoded">
+                    <form name="" action="/login" method="POST" enctype="application/x-www-form-urlencoded">
                         <div class="field"><label>User:</label><input type="text" name="username"/></div>
                         <div class="field"><label>Password:</label><input type="password" name="password"/></div>
-                        <button class="create">Create account</button><button type="submit"/>Sign in</button>
-                    </form>-->
+                        <a class="create" href="signup.html">Create account</a><button type="submit"/>Sign in</button>
+                    </form>
                 </div>
             </header>
         </div>

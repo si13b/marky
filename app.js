@@ -13,14 +13,7 @@ dataAccess.connect();
 
 var app = express();
 
-var QUERY_STRING = querystring.stringify({
-		client_id: config.github.client_id,
-		scope: 'user'
-	}),
-	auth_url = 'https://github.com/login/oauth/authorize?' + QUERY_STRING;
-
-var auth = Auth.create(config.github);
-auth.setURL(auth_url);
+var auth = Auth.create();
 auth.setDataAccess(dataAccess);
 
 app.configure(function() {
@@ -30,21 +23,10 @@ app.configure(function() {
 	app.use(express.static(__dirname + '/public'));
 });
 
-app.post('/login', function(req, res) {
-	console.log('redirecting to github login');
-	if (req.method === 'GET') res.redirect(auth_url);
-	else res.send(301, auth_url);
+app.post('/login', auth.check, function(req, res) {
+	res.redirect('app.html');
 });
-app.get('/login', function(req, res) {
-	console.log('redirecting to github login');
-	if (req.method === 'GET') res.redirect(auth_url);
-	else res.send(301, auth_url);
-});
-app.get('/auth', auth.check, function(req, res) {
-	console.log('redirecting to app index');
-	if (req.method === 'GET') res.redirect('app.html');
-	else res.send(301, 'app.html');
-});
+app.post('/signup', auth.signup);
 app.post('/logout', auth.logout);
 app.post('/download', auth.check, dataAccess.dump);
 app.post('/note/add', auth.check, dataAccess.addNote);
@@ -59,7 +41,6 @@ app.post('/folder/delete', auth.check, dataAccess.deleteFolder);
 app.post('/folder/rename', auth.check, dataAccess.renameFolder);
 app.post('/folder/add', auth.check, dataAccess.addFolder);
 app.post('/folder/colour', auth.check, dataAccess.saveColour);
-
 
 app.listen(config.port);
 console.log('Now listening on port 3000...');

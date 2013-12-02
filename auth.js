@@ -3,102 +3,92 @@ var util = require('./util');
 var https = require('https'),
 	querystring = require('querystring');
 
-// See docs @ http://mongodb.github.io/node-mongodb-native/
-
 var Auth = new util.Class();
 
 Auth.defaultOptions({
-	client_id: '123',
-	client_secret: '456'
 });
 
 Auth.field('_db', null);
-Auth.field('_url', null);
-
-Auth.method('setURL', function(newURL) {
-	this._url = newURL;
-});
 
 Auth.method('setDataAccess', function(newDataAccess) {
 	this._dataAccess = newDataAccess;
 });
 
-Auth.method('check', function(req, res, next) {
-	if (!req.session.token && req.query.code) {
-		console.log('Retrieving token for temp code: ' + req.query.code);
-		
-		this.requestToken(req.query.code, function (err, response) {
-			if (err) {
-				console.error('Error has occured: ' + err);
-				if (err.request && err.request.uri) console.error('href: ' + err.request.uri.href);
-				
-				if (req.method === 'GET') res.redirect('index.html');
-				else res.send(301, 'index.html');
-				return;
-			}
-			
-			var token = response.access_token;
-			
-			if (!token) {
-				console.error('Token was not provided?!');
-				
-				if (req.method === 'GET') res.redirect('index.html');
-				else res.send(301, 'index.html');
-				return;
-			}
-			
-			console.log('Token recevied');
-			
-			if (!req.session.token) req.session.token = token;
-			
-			this.user(req.session.token, function(err, response) {
-				if (err || !response.login) {
-					console.error(err);
-					
-					if (req.method === 'GET') res.redirect('index.html');
-					else res.send(301, 'index.html');
-					return;
-				}
-				
-				console.log('User: ' + response.login);
-				
-				req.session.username = response.login;
-				
-				this._dataAccess.updateUser(response, token, function(err, result) {
-					if (err || !result) {
-						console.error(err);
-			
-						if (req.method === 'GET') res.redirect('index.html');
-						else res.send(301, 'index.html');
-						return;
-					}
-					
-					next();
-				});
-			}.bind(this));
-		}.bind(this));
-	} else if (req.session.token) {
-		console.log('Existing token found');
-		
-		this._dataAccess.checkUser(req.session.username, req.session.token, function(err, result) {
-			if (err || !result) {
-				console.error(err);
+Auth.method('checkError', function(req, res, err, object) {
+	if (!err && object) return false;
+	console.error(err);
 	
-				if (req.method === 'GET') res.redirect('index.html');
-				else res.send(301, 'index.html');
-				return;
-			}
+	if (req.method === 'GET') res.redirect('index.html');
+	else res.send(301, 'index.html');
+	
+	return true;
+});
+
+Auth.method('signup', function(req, res) {
+	var signupError = function(message) {
+		// TODO Get error message to user somehow
+		console.error(message);
+		
+		res.redirect('signup.html');
+	}.bind(this);
+	
+	this._dataAccess.getUser(req.body.username, function(err, user) {
+		console.dir(user);
+		
+		if (!err && user) { // Existing user shouldn't exist
+			signupError('Username taken');
+			return;
+		}
+
+		if ((req.body.password != req.body.confirm) || !req.body.email || !req.body.name) {
+			signupError('Not all information was provided');
+			return;
+		}
+		
+		// TODO Catchpta + throttling?
+		
+		this._dataAccess.updateUser(req.body.username, req.body.email, req.body.name, req.body.password, onCreateUser);
+	}.bind(this));
+	
+	var onCreateUser = function(err, result) {
+		if (err || !result) {
+			signupError();
+			return;
+		}
+		
+		console.log('Account created');
+		res.redirect('index.html');
+	}.bind(this);
+});
+
+Auth.method('check', function(req, res, next) {
+	if (!req.session.password && req.body.password && req.body.username) {
+		this._dataAccess.checkUser(req.body.username, req.body.password, function(err, result) {
+			if (this.checkError(req, res, err, result)) return;
+			
+			req.session.username = req.body.username;
+			req.session.password = req.body.password;
 			
 			next();
-		});
+		}.bind(this));
+		
+	} else if (req.session.username && req.session.password) {
+		console.log('Existing user/pass found');
+		
+		this._dataAccess.checkUser(req.session.username, req.session.password, function(err, result) {
+			if (this.checkError(req, res, err, result)) return;
+			
+			next();
+		}.bind(this));
 	} else {
-		console.log('redirecting to github login');
-		if (req.method === 'GET') res.redirect(this._url);
-		else res.send(301, this._url);
+		console.log('User/pass not specified, redirecting to home');
+		if (req.method === 'GET') res.redirect('index.html');
+		else res.send(301, 'index.html');
 	}
 });
 
 Auth.method('requestToken', function(tempCode, callback) {
+	// OLD Github authentication
 	var data = querystring.stringify({
 		client_id: this.options.client_id,
 		client_secret: this.options.client_secret,
@@ -162,6 +152,8 @@ Auth.method('user', function(token, callback) {
 				return;
 			}
 			
+			console.dir(chunk);
+			
 			callback(null, JSON.parse(chunk));
 		});
 	});
@@ -174,20 +166,10 @@ Auth.method('user', function(token, callback) {
 });
 
 Auth.method('logout', function(req, res) {
-	this._dataAccess.clearUser(req.session.username, function(err, result) {
-		if (err || !result) {
-			log.error(err);
-			
-			if (req.method === 'GET') res.redirect('index.html');
-			else res.send(301, 'index.html');
-			return;
-		}
-		
-		if (req.session.token) req.session.token = null;
-		if (req.session.username) req.session.username = null;
-		if (req.method === 'GET') res.redirect('index.html');
-		else res.send(301, 'index.html');
-	});
+	if (req.session.password) req.session.password = null;
+	if (req.session.username) req.session.username = null;
+	if (req.method === 'GET') res.redirect('index.html');
+	else res.send(301, 'index.html');
 });
 
 exports.Auth = Auth;

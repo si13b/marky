@@ -30,57 +30,77 @@ DataAccess.method('connect', function() {
 	}.bind(this));
 });
 
-DataAccess.method('checkUser', function(username, token, callback) {
-	var users = this._db.collection('users'),
-		hashes = this._db.collection('hashes');
+DataAccess.method('getUser', function(username, callback) {
+	var users = this._db.collection('users');
 	
-	if (!username || !token) {
-		if (callback) callback(new Error('No token specified for authentication'));
+	if (!callback) return;
+	
+	if (!username) {
+		callback(new Error('No token specified for authentication'));
+		return;
+	}
+	
+	users.findOne({username: username}, callback);
+});
+
+DataAccess.method('checkUser', function(username, password, callback) {
+	var users = this._db.collection('users'),
+		hashes = this._db.collection('hashes'),
+		thisUser = null;
+		
+	if (!callback) return;
+	
+	if (!username || !password) {
+		callback(new Error('No token specified for authentication'));
 		return;
 	}
 	
 	users.findOne({username: username}, function(err, user) {
 		if (err || !user) {
 			console.error(err);
-			if (callback) callback(new Error('Could not retrieve user'));
+			callback(new Error('Could not retrieve user'));
 			return;
 		}
 		
+		thisUser = user;
+		
 		if (!user.salt) {
 			console.error('No salt set for user - not authenticated');
-			if (callback) callback(new Error('No salt set for user - not authenticated'));
+			callback(new Error('No salt set for user - not authenticated'));
 			return;
 		}
 		
 		var sha512 = crypto.createHash('sha512');
-		sha512.update(user.salt + token);
+		sha512.update(user.salt + password);
 		
-		hashes.findOne({hash: sha512.digest('hex')}, function(err, item) {
-			if (err || !user) {
-				console.error(err);
-				
-				// Validation failed - invalidate existing token immediately
-				user.salt = null;
-				users.save(user);
-				
-				if (callback) callback(new Error('Could not validate token'));
-				return;
-			}
+		hashes.findOne({hash: sha512.digest('hex')}, onHashFound);
+	});
+	
+	var onHashFound = function(err, item) {
+		if (err || !item) {
+			console.error(err);
 			
-			if (callback) callback(null, true);
-		});
-	}.bind(this));
+			// Validation failed - invalidate existing token immediately
+			thisUser.salt = null;
+			users.save(thisUser);
+			
+			callback(new Error('Could not validate token'));
+			return;
+		}
+		
+		callback(null, true);
+	}.bind(this)
+	
 });
 
-DataAccess.method('updateUser', function(githubUser, token, callback) {
+DataAccess.method('updateUser', function(login, email, name, password, callback) {
 	var users = this._db.collection('users');
-	users.findOne({username: githubUser.login}, function(err, item) {
+	users.findOne({username: login}, function(err, item) {
 		if (err || !item) {
 			users.insert({
-				username: githubUser.login,
-				github_id: githubUser.id,
-				email: githubUser.email,
-				name: githubUser.name
+				username: login,
+				email: email,
+				name: name
 			}, {w: 1}, function(err, result) {
 				if (err || !result || !result.length) {
 					console.error(err.stack);
@@ -88,17 +108,17 @@ DataAccess.method('updateUser', function(githubUser, token, callback) {
 					return;
 				}
 				
-				this._doUpdateUser(result[0], githubUser, token, callback);
+				this._doUpdateUser(result[0], password, callback);
 			}.bind(this));
 			
 			return;
 		}
 		
-		this._doUpdateUser(item, githubUser, token, callback);
+		this._doUpdateUser(item, password, callback);
 	}.bind(this));
 });
 
-DataAccess.method('_doUpdateUser', function(user, githubUser, token, callback) {
+DataAccess.method('_doUpdateUser', function(user, password, callback) {
 	var users = this._db.collection('users'),
 		hashes = this._db.collection('hashes');
 	
@@ -106,7 +126,7 @@ DataAccess.method('_doUpdateUser', function(user, githubUser, token, callback) {
 	users.save(user);
 	
 	var sha512 = crypto.createHash('sha512');
-	sha512.update(user.salt + token);
+	sha512.update(user.salt + password);
 	
 	hashes.insert({
 		hash: sha512.digest('hex')
