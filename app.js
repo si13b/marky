@@ -21,6 +21,10 @@ app.configure(function() {
 	app.use(express.cookieParser('crUjaw3mu4HAWrajuhad7g2yas5avUr3VusWet3UZupRaFaWRu8ugu')); // Secure config?
 	app.use(express.session());
 	app.use(express.static(__dirname + '/public'));
+	app.use(function(req, res, next){
+		console.log('[%s] %s %s', new Date(), req.method, req.url);
+		next();
+	});
 });
 
 app.post('/login', auth.check, function(req, res) {
