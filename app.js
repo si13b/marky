@@ -18,7 +18,7 @@ auth.setDataAccess(dataAccess);
 
 app.configure(function() {
 	app.use(express.bodyParser());
-	app.use(express.cookieParser('crUjaw3mu4HAWrajuhad7g2yas5avUr3VusWet3UZupRaFaWRu8ugu')); // Secure config?
+	app.use(express.cookieParser(config.cookieSecret)); // Secure config?
 	app.use(express.session());
 	app.use(express.static(__dirname + '/public'));
 	app.use(function(req, res, next){
