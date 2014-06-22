@@ -26,13 +26,9 @@ marky.request = new Class({
 		this.setOptions(options);
 	},
 	
-	_error: function() {
-		this.fireEvent('error', []);
-	},
-	
-	_failure: function(event) {
-		if (event.status === 301) {
-			window.location = event.responseText;
+	onError: function(event) {
+		if (Number(event.status) === 401) {
+			window.location = 'index.html';
 		} else {
 			this.fireEvent('error', [event]);
 		}
@@ -51,176 +47,106 @@ marky.request = new Class({
 		oReq.send();
 	},
 	
-	getTree: function(callback) {
-		new Request.JSON({url: '/folder/tree', onSuccess: function(result) {
-			// TODO Should use HTTP response codes for unauthenticated
-			if (result.unauthenticated) {
-				window.location = 'login.html';
+	send: function(url, sendData, callback) {
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState !== 4) return;
+			if (xhr.status !== 200) {
+				this.onError(xhr);
+				return;
+			}
+			var responseJSON = JSON.parse(xhr.responseText);
+			if (responseJSON && responseJSON.unauthenticated) {
+				window.location = 'index.html';
 				return;
 			}
 			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({});
+			if (callback) callback(responseJSON);
+		}.bind(this);
+		xhr.open('POST', url);
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.send(sendData ? JSON.stringify(sendData) : '{}');
+	},
+	
+	// TODO These are redundant - call send directly from source
+	getTree: function(callback) {
+		this.send('/folder/tree', null, callback);
 	},
 	
 	getFolders: function(callback) {
-		new Request.JSON({url: '/folder/list', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({});
+		this.send('/folder/list', null, callback);
 	},
 	
 	addFolder: function(name, parentID, callback) {
-		new Request.JSON({url: '/folder/add', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/folder/add', {
 			name: name,
 			parent: parentID || undefined,
 			folder: true
-		});
+		}, callback);
 	},
 	
 	saveColour: function(folderID, colour, callback) {
-		new Request.JSON({url: '/folder/colour', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/folder/colour', {
 			folder: folderID,
 			colour: colour
-		});
+		}, callback);
 	},
 	
 	addNote: function(name, parentID, callback) {
-		new Request.JSON({url: '/note/add', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/note/add', {
 			name: name,
 			parent: parentID || undefined,
 			content: ''
-		});
+		}, callback);
 	},
 	
 	deleteNote: function(noteID, callback) {
-		new Request.JSON({url: '/note/delete', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/note/delete', {
 			note: noteID
-		});
+		}, callback);
 	},
 	
 	deleteFolder: function(folderID, callback) {
-		new Request.JSON({url: '/folder/delete', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/folder/delete', {
 			folder: folderID
-		});
+		}, callback);
 	},
 	
 	getNote: function(key, callback) {
-		new Request.JSON({url: '/note/content/get', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/note/content/get', {
 			note: key
-		});
+		}, callback);
 	},
 	
 	logout: function(callback) {
-		new Request.JSON({url: '/logout', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({});
+		this.send('/logout', null, callback);
 	},
 	
 	saveContent: function(noteID, content, callback) {
-		new Request.JSON({url: '/note/content/save', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/note/content/save', {
 			note: noteID,
 			content: content
-		});
+		}, callback);
 	},
 	
 	saveName: function(noteID, name, callback) {
-		new Request.JSON({url: '/note/rename', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/note/rename', {
 			note: noteID,
 			name: name
-		});
+		}, callback);
 	},
 	
 	renameFolder: function(folderID, name, callback) {
-		new Request.JSON({url: '/folder/rename', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/folder/rename', {
 			folder: folderID,
 			name: name
-		});
+		}, callback);
 	},
 	
 	move: function(noteID, newParent, callback) {
-		new Request.JSON({url: '/note/move', onSuccess: function(result) {
-			if (result.unauthenticated) {
-				window.location = 'login.html';
-				return;
-			}
-			
-			if (callback) callback(result);
-		}, onError: this._error, onFailure: this._failure}).post({
+		this.send('/note/move', {
 			note: noteID,
 			parent: newParent
-		});
+		}, callback);
 	}
 });
