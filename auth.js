@@ -19,7 +19,9 @@ Auth.method('checkError', function(req, res, err, object) {
 	console.error(err);
 	
 	if (req.method === 'GET') res.redirect('index.html');
-	else res.send(301, 'index.html');
+	else res.send(401, JSON.stringify({
+		error: err
+	}));
 	
 	return true;
 });
@@ -57,11 +59,13 @@ Auth.method('signup', function(req, res) {
 		}
 		
 		console.log('Account created');
-		res.redirect('index.html');
+		res.redirect('index.html'); // TODO Get rid of these manual redirections
 	}.bind(this);
 });
 
 Auth.method('check', function(req, res, next) {
+	console.dir(req.body);
+	console.dir(req.session);
 	if (!req.session.password && req.body.password && req.body.username) {
 		this._dataAccess.checkUser(req.body.username, req.body.password, function(err, result) {
 			if (this.checkError(req, res, err, result)) return;
@@ -81,9 +85,7 @@ Auth.method('check', function(req, res, next) {
 			next();
 		}.bind(this));
 	} else {
-		console.log('User/pass not specified, redirecting to home');
-		if (req.method === 'GET') res.redirect('index.html');
-		else res.send(301, 'index.html');
+		this.checkError(req, res, new Error('User/pass not specified, redirecting to home'), null);
 	}
 });
 

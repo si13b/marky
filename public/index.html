@@ -120,6 +120,11 @@
             font-size: 80%;
         }
         
+        .error {
+            color: red;
+            font-size: 80%;
+        }
+        
         footer {
             font-size: 70%;
             text-align: center;
@@ -136,11 +141,11 @@
                     <h2>Hierarchial Markdown notes for coders</h2>
                 </div>
                 <div class="actions">
-                    <form name="" action="/login" method="POST" enctype="application/x-www-form-urlencoded">
-                        <div class="field"><label>User:</label><input type="text" name="username"/></div>
-                        <div class="field"><label>Password:</label><input type="password" name="password"/></div>
-                        <a class="create" href="signup.html">Create account</a><button type="submit"/>Sign in</button>
-                    </form>
+                    <form method="post" action="/login">
+                    <div class="field"><label>User:</label><input type="text" name="username"/></div>
+                    <div class="field"><label>Password:</label><input type="password" name="password"/></div>
+                    <a class="create" href="signup.html">Create account</a><button type="submit" class="signin">Sign in</button></form>
+                    <div class="error"></div>
                 </div>
             </header>
         </div>

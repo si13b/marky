@@ -80,10 +80,6 @@ DataAccess.method('checkUser', function(username, password, callback) {
 		if (err || !item) {
 			console.error(err);
 			
-			// Validation failed - invalidate existing token immediately
-			thisUser.salt = null;
-			users.save(thisUser);
-			
 			callback(new Error('Could not validate token'));
 			return;
 		}
