@@ -2,21 +2,33 @@
 
 require('./util');
 var express = require('express'),
-	DataAccess = require('./data_access').DataAccess,
-	Auth = require('./auth').Auth,
+	Notes = require('./notes'),
+	Folders = require('./folders'),
+	Users = require('./users'),
+	Auth = require('./auth'),
 	config = require('./config.json'),
 	querystring = require('querystring'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger(),
-	dataAccess = DataAccess.create(config.db);
+	Db = require('mongodb').Db,
+	Server = require('mongodb').Server;
 
-dataAccess.connect();
+var db = new Db(config.db.name, new Server(config.db.host, config.db.port), {safe: false});
+db.open(function(err, db) {
+	if (err) {
+		logger.error(err);
+		return;
+	}
 
+	logger.info('Connected to Mongo');
+});
 
 var app = express();
 
-var auth = Auth.create();
-auth.setDataAccess(dataAccess);
+var users = new Users(db),
+	folders = new Folders(db),
+	notes = new Notes(db);
+	auth = new Auth(users);
 
 app.configure(function() {
 	app.use(express.bodyParser());
@@ -34,19 +46,19 @@ app.post('/login', auth.check, function(req, res) {
 });
 app.post('/signup', auth.signup);
 app.post('/logout', auth.logout);
-app.post('/download', auth.check, dataAccess.dump);
-app.post('/note/add', auth.check, dataAccess.addNote);
-app.post('/note/delete', auth.check, dataAccess.deleteNote);
-app.post('/note/content/get', auth.check, dataAccess.getContent);
-app.post('/note/content/save', auth.check, dataAccess.saveContent);
-app.post('/note/rename', auth.check, dataAccess.saveName);
-app.post('/note/move', auth.check, dataAccess.move);
-app.post('/folder/tree', auth.check, dataAccess.getTree);
-app.post('/folder/list', auth.check, dataAccess.getFolders);
-app.post('/folder/delete', auth.check, dataAccess.deleteFolder);
-app.post('/folder/rename', auth.check, dataAccess.renameFolder);
-app.post('/folder/add', auth.check, dataAccess.addFolder);
-app.post('/folder/colour', auth.check, dataAccess.saveColour);
+app.post('/download', auth.check, notes.dump);
+app.post('/note/add', auth.check, notes.addNote);
+app.post('/note/delete', auth.check, notes.deleteNote);
+app.post('/note/content/get', auth.check, notes.getContent);
+app.post('/note/content/save', auth.check, notes.saveContent);
+app.post('/note/rename', auth.check, notes.saveName);
+app.post('/note/move', auth.check, notes.move);
+app.post('/folder/tree', auth.check, notes.getTree);
+app.post('/folder/list', auth.check, folders.getFolders);
+app.post('/folder/delete', auth.check, folders.deleteFolder);
+app.post('/folder/rename', auth.check, folders.renameFolder);
+app.post('/folder/add', auth.check, folders.addFolder);
+app.post('/folder/colour', auth.check, folders.saveColour);
 
 app.listen(config.port);
 console.log('Now listening on port 3000...');
