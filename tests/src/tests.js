@@ -1,5 +1,3 @@
-
-
 module.exports = {
 	'Pre-test': function(client) {
 		client
@@ -8,15 +6,7 @@ module.exports = {
 
 	'Marky login test': function(client) {
 		client
-			.waitForElementVisible('input[name="username"]', 1000)
-			.assert.title('marky')
-			.assert.visible('input[name="username"]')
-			.assert.visible('input[name="password"]')
-			.assert.visible('button[type="submit"]')
-			.setValue('input[name="username"]', 'admin')
-			.setValue('input[name="password"]', 'admin')
-			.click('button[type="submit"]')
-			.pause(1000)
+			.login('admin', 'admin')
 			.assert.containsText('.blank', 'Create or select a note to get started')
 			.assert.elementPresent('ul.tree.shown')
 			.assert.elementNotPresent('ul.tree.shown > li', 'The tree should be initially empty')
@@ -25,9 +15,9 @@ module.exports = {
 
 	'Creating a note': function(client) {
 		client
+			.assert.elementNotPresent('ul.tree.shown > li', 'New note')
 			.click('button[title="New note"]')
-			.waitForElementVisible('ul.tree.shown > li', 1000)
-			.assert.containsText('ul.tree.shown > li', 'New note')
+			.selectNote('New note')
 			.click('ul.tree.shown > li')
 			.waitForElementVisible('#aceeditor', 1000)
 			.waitForElementVisible('.title > input[type="text"]', 1000)
@@ -52,7 +42,7 @@ module.exports = {
 			.assert.elementPresent('ul.tree.shown > li.folder.expanded > .meta > .beta > .setting.active')
 			.waitForElementVisible('ul.tree.shown > li.folder.expanded > .settings', 1000)
 			.clearValue('ul.tree.shown > li.folder.expanded > .settings > .name > input[type="text"]')
-			.setValue('ul.tree.shown > li.folder.expanded > .settings > .name > input[type="text"]', 'A folder for testing')
+			.setValue('ul.tree.shown > li.folder.expanded > .settings > .name > input[type="text"]', ['A folder for testing', client.Keys.ENTER])
 			.click('ul.tree.shown > li.folder.expanded > .settings > .colours > .colour.green')
 			.assert.elementPresent('ul.tree.shown > li.folder.expanded.green')
 			.assert.containsText('ul.tree.shown > li.folder.expanded.green > .meta > .alpha', 'A folder for testing')
@@ -62,17 +52,23 @@ module.exports = {
 	},
 
 	'Move a note to a folder': function(client) {
-
+		////*[contains(text(),'match')]
+		//contains(@prop,'Foo')
+		client
+			.selectNote('Note used for testing')
+			.waitForElementVisible('.toolbar > .alpha > button[title="Move to"]', 1000)
+			.click('.toolbar > .alpha > button[title="Move to"]')
+			.waitForElementVisible('.panel > ul > li', 1000)
+			.useXpath()
+			.click('//div[contains(@class, "panel")]/ul/li[@data-id and contains(text(), "A folder for testing")]')
+			.useCss()
+			.waitForElementNotPresent('.panel > ul > li', 1000)
+		;
 	},
 
 	'Logout': function(client) {
 		client
-			.click('.actions > a[title="Logout"]')
-			.waitForElementVisible('input[name="username"]', 1000)
-			.assert.title('marky')
-			.assert.visible('input[name="username"]')
-			.assert.visible('input[name="password"]')
-			.assert.visible('button[type="submit"]')
+			.logout()
 			.end();
 	}
 };

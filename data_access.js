@@ -4,7 +4,9 @@ var Db = require('mongodb').Db,
 	ObjectID = require('mongodb').ObjectID,
 	Server = require('mongodb').Server,
 	crypto = require('crypto'),
-	Zip = require('node-zip');
+	Zip = require('node-zip'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger();
 
 // See docs @ http://mongodb.github.io/node-mongodb-native/
 
@@ -23,9 +25,9 @@ DataAccess.method('connect', function() {
 	
 	this._db.open(function(err, db) {
 		if (!err) {
-			console.log("Connected to mongo!");
+			logger.info("Connected to mongo!");
 		} else {
-			console.error(err);
+			logger.error(err);
 		}
 	}.bind(this));
 });
@@ -57,7 +59,7 @@ DataAccess.method('checkUser', function(username, password, callback) {
 	
 	users.findOne({username: username}, function(err, user) {
 		if (err || !user) {
-			console.error(err);
+			logger.error(err);
 			callback(new Error('Could not retrieve user'));
 			return;
 		}
@@ -65,7 +67,7 @@ DataAccess.method('checkUser', function(username, password, callback) {
 		thisUser = user;
 		
 		if (!user.salt) {
-			console.error('No salt set for user - not authenticated');
+			logger.error('No salt set for user - not authenticated');
 			callback(new Error('No salt set for user - not authenticated'));
 			return;
 		}
@@ -78,7 +80,7 @@ DataAccess.method('checkUser', function(username, password, callback) {
 	
 	var onHashFound = function(err, item) {
 		if (err || !item) {
-			console.error(err);
+			logger.error(err);
 			
 			callback(new Error('Could not validate token'));
 			return;
@@ -99,7 +101,7 @@ DataAccess.method('updateUser', function(login, email, name, password, callback)
 				name: name
 			}, {w: 1}, function(err, result) {
 				if (err || !result || !result.length) {
-					console.error(err.stack);
+					logger.error(err);
 					resp.end(500, "Error creating user");
 					return;
 				}
@@ -128,7 +130,7 @@ DataAccess.method('_doUpdateUser', function(user, password, callback) {
 		hash: sha512.digest('hex')
 	}, {w: 1}, function(err, result) {
 		if (err) {
-			console.error(err.stack);
+			logger.error(err);
 			resp.end(500, "Error creating user");
 			return;
 		}
@@ -163,7 +165,7 @@ DataAccess.method('getTree', function(req, resp) {
 		
 	folders.find({user: req.session.username}).toArray(function(err, docs) {
 		if (err) {
-			console.error(err.stack);
+			logger.error(err);
 			resp.end(500, "Error retrieving tree");
 			return;
 		}
@@ -234,7 +236,7 @@ DataAccess.method('getFolders', function(req, resp) {
 	
 	folders.find({user: req.session.username}).toArray(function(err, docs) {
 		if (err) {
-			console.error(err.stack);
+			logger.error(err);
 			resp.end(500, "Error retrieving folders");
 			return;
 		}
@@ -291,7 +293,7 @@ DataAccess.method('deleteFolder', function(req, resp) {
 	
 	notes.find({parent: new ObjectID(req.body.folder), user: req.session.username}).toArray(function(err, noteDocs) {
 		if (err || !noteDocs) {
-			console.error(err.stack);
+			logger.error(err);
 			resp.end(500, "Could not delete folder");
 			return;
 		}
@@ -317,7 +319,7 @@ DataAccess.method('getContent', function(req, resp) {
 		
 	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err.stack);
+			logger.error(err);
 			resp.end(500, "Could not retrieve content");
 			return;
 		}
@@ -331,7 +333,7 @@ DataAccess.method('saveContent', function(req, resp) {
 		
 	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err);
+			logger.error(err);
 			resp.end(JSON.stringify({
 				error: err || 'Object is null'
 			}));
@@ -353,7 +355,7 @@ DataAccess.method('saveName', function(req, resp) {
 		
 	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err.stack);
+			logger.error(err);
 			resp.end(500, "Could not save note name");
 			return;
 		}
@@ -373,7 +375,7 @@ DataAccess.method('renameFolder', function(req, resp) {
 		
 	folders.findOne({_id: new ObjectID(req.body.folder), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err.stack);
+			logger.error(err);
 			resp.end(500, "Could not rename folder");
 			return;
 		}
@@ -393,7 +395,7 @@ DataAccess.method('saveColour', function(req, resp) {
 		
 	folders.findOne({_id: new ObjectID(req.body.folder), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err.stack);
+			logger.error(err);
 			resp.end(JSON.stringify({
 				error: err || 'Object is null'
 			}));
@@ -415,7 +417,7 @@ DataAccess.method('move', function(req, resp) {
 		
 	notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
 		if (err || !item) {
-			console.error(err.stack);
+			logger.error(err);
 			resp.end(500, "Could not move note");
 			return;
 		}
