@@ -6,8 +6,10 @@ var express = require('express'),
 	Auth = require('./auth').Auth,
 	config = require('./config.json'),
 	querystring = require('querystring'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger(),
 	dataAccess = DataAccess.create(config.db);
-	
+
 dataAccess.connect();
 
 
@@ -21,8 +23,8 @@ app.configure(function() {
 	app.use(express.cookieParser(config.cookieSecret)); // Secure config?
 	app.use(express.session());
 	app.use(express.static(__dirname + '/public'));
-	app.use(function(req, res, next){
-		console.log('[%s] %s %s', new Date(), req.method, req.url);
+	app.use(function(req, res, next) {
+		logger.info(req.method + ' ' + req.url);
 		next();
 	});
 });

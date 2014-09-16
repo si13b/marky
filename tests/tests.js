@@ -1,66 +1,78 @@
-var casper = require('casper').create({
-    verbose: true,
-    logLevel: 'info'
-});
 
-casper.start('http://localhost:3000/index.html', function() {
-  casper.log('Logging in', 'info');
-  this.test.assertExists('form input[name="username"]');
-  
-  casper.waitForSelector("form input[name='username']", function () {
-    this.test.assertExists("form input[name='username']");
-    this.click("form input[name='username']");
-    this.sendKeys("input[name='username']", 'simon');
-  });
-  
-  casper.waitForSelector("input[name='password']", function () {
-    this.sendKeys("input[name='password']", 'simon');
-  });
-  
-  casper.waitForSelector('button[type="submit"]', function() {
-    this.click('button[type="submit"]');
-  });
-});
 
-casper.then(function() {
-  casper.waitForSelector('nav', function() {
-    casper.log('Application loaded', 'info');
-  });
-  
-  casper.waitForSelector('nav > .tree.shown > li:last-child', function() {
-    casper.log('Clicked last nav item', 'info');
-    this.click('nav > .tree.shown > li:last-child');
-  });
-  
-  casper.waitForSelector('.editor.selected > .ace_editor > textarea', function() {
-    casper.log('Clicked editor', 'info');
-    this.click('.editor.selected > .ace_editor > textarea');
-    this.sendKeys(".editor.selected > .ace_editor > textarea", 'Adding some text to the editor');
-    this.test.assertSelectorHasText('.editor.selected > .ace_editor > textarea', 'Adding some text to the editor');
-  });
-  
-  casper.waitForSelector('.editor.selected > .toolbar > .alpha > button[title="Save"]', function() {
-    this.click('.editor.selected > .toolbar > .alpha > button[title="Save"]');
-  });
-  
-  casper.waitForSelector('nav > .tree.shown > li:nth-child(3)', function() {
-    casper.log('Clicked third nav item', 'info');
-    this.click('nav > .tree.shown > li:nth-child(3)');
-  });
-  
-  casper.waitForSelector('nav > .tree.shown > li:last-child', function() {
-    casper.log('Clicked last nav item', 'info');
-    this.click('nav > .tree.shown > li:last-child');
-  });
-  
-  casper.waitForSelector('.editor.selected > .ace_editor > textarea', function() {
-    casper.log(this.evaluate(function() {
-      return document.querySelector('.editor.selected > .ace_editor > textarea').textContent;
-    }), 'info');
-  });
-});
+module.exports = {
+	'Pre-test': function(client) {
+		client
+			.url('http://localhost:3000');
+	},
 
-casper.run(function() {
-  this.test.renderResults(true);
-  this.test.done();
-});
+	'Marky login test': function(client) {
+		client
+			.waitForElementVisible('input[name="username"]', 1000)
+			.assert.title('marky')
+			.assert.visible('input[name="username"]')
+			.assert.visible('input[name="password"]')
+			.assert.visible('button[type="submit"]')
+			.setValue('input[name="username"]', 'admin')
+			.setValue('input[name="password"]', 'admin')
+			.click('button[type="submit"]')
+			.pause(1000)
+			.assert.containsText('.blank', 'Create or select a note to get started')
+			.assert.elementPresent('ul.tree.shown')
+			.assert.elementNotPresent('ul.tree.shown > li', 'The tree should be initially empty')
+			;
+	},
+
+	'Creating a note': function(client) {
+		client
+			.click('button[title="New note"]')
+			.waitForElementVisible('ul.tree.shown > li', 1000)
+			.assert.containsText('ul.tree.shown > li', 'New note')
+			.click('ul.tree.shown > li')
+			.waitForElementVisible('#aceeditor', 1000)
+			.waitForElementVisible('.title > input[type="text"]', 1000)
+			.clearValue('.title > input[type="text"]')
+			.setValue('.title > input[type="text"]', 'Note used for testing')
+			.click('#aceeditor textarea')
+			.keys('Hello testing one two')
+			.waitForElementVisible('#aceeditor .ace_scroller', 1000)
+			.assert.containsText('#aceeditor .ace_scroller', 'Hello testing one two')
+			.click('.toolbar button[title="Save"]')
+			.assert.containsText('ul.tree.shown > li.selected', 'Note used for testing');
+	},
+
+	'Creating a folder': function(client) {
+		client
+			.click('button[title="New folder"]')
+			.waitForElementVisible('ul.tree.shown > li.folder', 1000)
+			.assert.containsText('ul.tree.shown > li.folder', 'New folder')
+			.click('ul.tree.shown > li.folder')
+			.assert.elementPresent('ul.tree.shown > li.folder.expanded')
+			.click('ul.tree.shown > li.folder.expanded > .meta > .beta > .setting')
+			.assert.elementPresent('ul.tree.shown > li.folder.expanded > .meta > .beta > .setting.active')
+			.waitForElementVisible('ul.tree.shown > li.folder.expanded > .settings', 1000)
+			.clearValue('ul.tree.shown > li.folder.expanded > .settings > .name > input[type="text"]')
+			.setValue('ul.tree.shown > li.folder.expanded > .settings > .name > input[type="text"]', 'A folder for testing')
+			.click('ul.tree.shown > li.folder.expanded > .settings > .colours > .colour.green')
+			.assert.elementPresent('ul.tree.shown > li.folder.expanded.green')
+			.assert.containsText('ul.tree.shown > li.folder.expanded.green > .meta > .alpha', 'A folder for testing')
+			.click('ul.tree.shown > li.folder.expanded > .meta > .beta > .setting.active')
+			.waitForElementNotPresent('ul.tree.shown > li.folder.expanded > .meta > .beta > .setting.active', 1000)
+		;
+	},
+
+	'Move a note to a folder': function(client) {
+
+	},
+
+	'Logout': function(client) {
+		client
+			.click('.actions > a[title="Logout"]')
+			.waitForElementVisible('input[name="username"]', 1000)
+			.assert.title('marky')
+			.assert.visible('input[name="username"]')
+			.assert.visible('input[name="password"]')
+			.assert.visible('button[type="submit"]')
+			.end();
+	}
+};
