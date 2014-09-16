@@ -8,7 +8,7 @@ exports.command = function(username, password) {
 		.setValue('input[name="username"]', username)
 		.setValue('input[name="password"]', password)
 		.click('button[type="submit"]')
-		.waitForElementVisible('.blank', 1000)
+		.waitForElementVisible('.blank', 5000)
 		.pause(500);
 
 	return this;

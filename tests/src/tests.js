@@ -66,7 +66,41 @@ module.exports = {
 			.useXpath()
 			.click('//div[contains(@class, "panel")]/ul/li[@data-id and contains(text(), "A folder for testing")]')
 			.useCss()
+			// Select another note
 			.waitForElementNotPresent('.panel > ul > li', 1000)
+			.click('button[title="New note"]')
+			.selectNote('New note')
+			.expandFolder('A folder for testing')
+			.selectFolderNote('A folder for testing', 'Note used for testing')
+		;
+	},
+
+	'Deleting a note': function(client) {
+		client
+			.assert.elementPresent('ul.tree.shown > li', 'New note') // Created in last test
+			//.click('button[title="New note"]')
+			.selectNote('New note')
+			.click('ul.tree.shown > li')
+			.waitForElementVisible('#aceeditor', 1000)
+			.waitForElementVisible('.title > input[type="text"]', 1000)
+			.clearValue('.title > input[type="text"]')
+			.setValue('.title > input[type="text"]', 'Delete ME!!!')
+			.click('#aceeditor textarea')
+			.keys('DELETETELTELTELTLETLETLETELTELTLETLELTELT')
+			.waitForElementVisible('#aceeditor .ace_scroller', 1000)
+			.assert.containsText('#aceeditor .ace_scroller', 'DELETETELTELTELTLETLETLETELTELTLETLELTELT')
+			.click('.toolbar button[title="Save"]')
+			// Create yet another note
+			.click('button[title="New note"]')
+			.selectNote('New note')
+			.selectNote('Delete ME!!!')
+			.click('.toolbar > .beta > a[title="Delete note"]')
+			.waitForElementNotVisible('#aceeditor', 1000)
+			.waitForElementNotVisible('.title > input[type="text"]', 1000)
+			.selectNote('New note')
+			.click('.toolbar > .beta > a[title="Delete note"]')
+			.waitForElementNotVisible('#aceeditor', 1000)
+			.waitForElementNotVisible('.title > input[type="text"]', 1000)
 		;
 	},
 

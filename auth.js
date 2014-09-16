@@ -1,6 +1,8 @@
 var Util = require('./util'),
 	https = require('https'),
-	querystring = require('querystring');
+	querystring = require('querystring'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger();
 
 var Auth = Util.Class({
 	init: function(userModule) {
@@ -9,7 +11,7 @@ var Auth = Util.Class({
 
 	checkError: function (req, res, err, object) {
 		if (!err && object) return false;
-		console.error(err);
+		logger.error(err);
 
 		if (req.method === 'GET') res.redirect('index.html');
 		else res.send(401, JSON.stringify({
@@ -22,14 +24,12 @@ var Auth = Util.Class({
 	signup: function (req, res) {
 		var signupError = function (message) {
 			// TODO Get error message to user somehow
-			console.error(message);
+			logger.error(message);
 
 			res.redirect('signup.html');
 		}.bind(this);
 
 		this._userModule.getUser(req.body.username, function (err, user) {
-			console.dir(user);
-
 			if (!err && user) { // Existing user shouldn't exist
 				signupError('Username taken');
 				return;
@@ -51,13 +51,20 @@ var Auth = Util.Class({
 				return;
 			}
 
-			console.log('Account created');
+			logger.info('Account created');
 			res.redirect('index.html'); // TODO Get rid of these manual redirections
 		}.bind(this);
 	},
 
+	/**
+	 * Authenticate user and initiate session if necessary.
+	 *
+	 * Credentials must be in the request or in the session, otherwise the user
+	 * is redirected to the login page.
+	 */
 	check: function (req, res, next) {
 		if (!req.session.password && req.body.password && req.body.username) {
+			// Attempt to start new session using requested user/pass
 			this._userModule.checkUser(req.body.username, req.body.password, function (err, result) {
 				if (this.checkError(req, res, err, result)) return;
 
@@ -68,14 +75,14 @@ var Auth = Util.Class({
 			}.bind(this));
 
 		} else if (req.session.username && req.session.password) {
-			console.log('Existing user/pass found');
-
+			// Continuing an existing session with stored user/pass
 			this._userModule.checkUser(req.session.username, req.session.password, function (err, result) {
 				if (this.checkError(req, res, err, result)) return;
 
 				next();
 			}.bind(this));
 		} else {
+			// No user/pass in request or session! Redirect to login.
 			this.checkError(req, res, new Error('User/pass not specified, redirecting to home'), null);
 		}
 	},

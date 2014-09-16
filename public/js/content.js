@@ -56,7 +56,8 @@ marky.content = new Class({
 		this._elAce = $$('#aceeditor');
 		
 		this._render();
-		this._timer = this.save.periodical(this.options.autosave);
+		// Disabled old periodic save approach
+		//this._timer = this.save.periodical(this.options.autosave);
 	},
 	
 	_render: function() {
@@ -115,6 +116,8 @@ marky.content = new Class({
 	},
 	
 	save: function() {
+		if (!this._selected || !this._selected.note) return;
+
 		this._db.saveContent(this._selected, this._ace.getValue(), function() {
 			console.log('Successfully saved');
 			new marky.msg({}).show('Successfully saved');

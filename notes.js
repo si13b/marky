@@ -134,6 +134,13 @@ var Notes = Util.Class({
 	},
 
 	saveContent: function(req, resp) {
+		if (!req || !req.body || !req.body.note) {
+			resp.end(JSON.stringify({
+				success: true
+			}));
+			return;
+		}
+
 		var notes = this._db.collection('notes');
 
 		notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
