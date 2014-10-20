@@ -1,7 +1,7 @@
 module.exports = {
 	'Pre-test': function(client) {
 		client
-			.url('http://localhost:3000');
+			.init();
 	},
 
 	'Marky login test': function(client) {

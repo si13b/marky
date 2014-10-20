@@ -13,8 +13,7 @@
 
 	"test_settings" : {
 		"default" : {
-			"launch_url" : "http://localhost",
-			"port"  : 4444,
+			"launch_url" : "http://localhost:3000",
 			"silent": true,
 			"firefox_profile": false,
 			"screenshots" : {

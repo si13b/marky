@@ -54,7 +54,6 @@ marky.nav = new Class({
 	},
 	
 	render: function(tree) {
-		
 		this._elOpts = new Element('div', {
 			'class': 'opts'
 		}).adopt(
