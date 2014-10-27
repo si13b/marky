@@ -11,7 +11,8 @@ var fs = require('fs'),
 describe('unit test experiment using jsdom approach', function() {
   this.timeout(60000);
 
-	var window = null;
+	var window = null,
+		mockInstance = null;
 
 	beforeEach(function(done) {
 		jsdom.env({
@@ -20,39 +21,32 @@ describe('unit test experiment using jsdom approach', function() {
 			done: function (errors, thisWindow) {
 				assert.ok(!errors, 'Should be no errors running scripts');
 				window = thisWindow;
-				done()
+				mockInstance = {
+					element: new window.Element('div', {
+						'class': 'nav'
+					})
+				};
+				done();
 			}
 		});
 	});
 
-	it('render() draws correct elements', function() {
+	it('basic script artifacts exist', function() {
 		assert.ok(window.marky.nav);
 		assert.ok(window.Element);
+	});
 
-		var mock = {
-			element: new window.Element('div', {
-				'class': 'nav'
-			})
-		};
-		(window.marky.nav.prototype.render.bind(mock))();
+	it('render() draws correct elements', function() {
+		(window.marky.nav.prototype.render.bind(mockInstance))();
 
-		assert.ok(mock._elOpts);
-		assert.ok(mock.element.getChildren('.opts'));
-		assert.ok(mock._elUpload);
-		assert.ok(mock.element.getChildren('.upload'));
-		assert.ok(mock.element.getElement('.upload > input[type=file]'));
+		assert.ok(mockInstance._elOpts);
+		assert.ok(mockInstance.element.getChildren('.opts'));
+		assert.ok(mockInstance._elUpload);
+		assert.ok(mockInstance.element.getChildren('.upload'));
+		assert.ok(mockInstance.element.getElement('.upload > input[type=file]'));
 	});
 
 	it('_toggleSettings() toggles on', function() {
-		assert.ok(window.marky.nav);
-		assert.ok(window.Element);
-
-		var mock = {
-			element: new window.Element('div', {
-				'class': 'nav'
-			})
-		};
-
 		var mockTarget = new window.Element('img', {});
 
 		var mockFolder = new window.Element('li', {
@@ -71,22 +65,13 @@ describe('unit test experiment using jsdom approach', function() {
 			target: mockTarget
 		};
 
-		(window.marky.nav.prototype._toggleSettings.bind(mock))(mockEvent);
+		(window.marky.nav.prototype._toggleSettings.bind(mockInstance))(mockEvent);
 
 		assert.ok(mockFolder.getElement('.setting').hasClass('active'));
 		assert.ok(mockFolder.getElement('.settings').hasClass('shown'));
 	});
 
 	it('_toggleSettings() toggles off', function() {
-		assert.ok(window.marky.nav);
-		assert.ok(window.Element);
-
-		var mock = {
-			element: new window.Element('div', {
-				'class': 'nav'
-			})
-		};
-
 		var mockTarget = new window.Element('img', {});
 
 		var mockFolder = new window.Element('li', {
@@ -105,9 +90,32 @@ describe('unit test experiment using jsdom approach', function() {
 			target: mockTarget
 		};
 
-		(window.marky.nav.prototype._toggleSettings.bind(mock))(mockEvent);
+		(window.marky.nav.prototype._toggleSettings.bind(mockInstance))(mockEvent);
 
 		assert.ok(!mockFolder.getElement('.setting').hasClass('active'));
 		assert.ok(!mockFolder.getElement('.settings').hasClass('shown'));
+	});
+
+	it('_addItem() adds element', function(done) {
+		mockInstance._elTree = new window.Element('ul', {
+			'class': 'tree'
+		});
+		mockInstance.options = {
+			defaultName: 'Default name!'
+		};
+		mockInstance._db = {
+			addNote: function(name, stuff, callback) {
+				callback({
+					_id: 'testid'
+				});
+
+				assert.ok(mockInstance._elTree.getElement('li[data-id="testid"]'), 'New element has been added');
+				assert.equal(mockInstance._elTree.getElement('li[data-id="testid"]').get('text'), 'Default name!', 'New element has correct text');
+
+				done();
+			}
+		};
+
+		(window.marky.nav.prototype._addItem.bind(mockInstance))();
 	});
 });
