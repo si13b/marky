@@ -12,7 +12,7 @@ Mocktools.Arrayerizer(Array.prototype);
 var script = fs.readFileSync('../public/js/nav.js');
 eval('var marky = {};\n' + script); // Execute front-end script
 
-describe('a suite of tests', function() {
+describe('unit test experiment using hand-crafted mocks approach', function() {
   this.timeout(500);
 	
   it('Retrieve artefacts', function() {
