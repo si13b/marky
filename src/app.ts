@@ -13,11 +13,23 @@ import cookieParser = require('cookie-parser');
 import expressSession = require('express-session');
 import log4js = require('log4js');
 import Notes = require('./notes');
+import Folders = require('./folders');
+import Users = require('./users');
+import Auth = require('./auth');
 
-var	Folders = require('./folders'),
-	Users = require('./users'),
-	Auth = require('./auth'),
-	config = require('./../config.json'),
+interface DBConfig {
+	host: string;
+	port: number;
+	name: string;
+}
+
+interface Config {
+	port: number;
+	db: DBConfig;
+	cookieSecret: string;
+}
+
+var	config: Config = require('./../config.json'),
 	logger = log4js.getLogger(),
 	Db = MongoDB.Db,
 	Server = MongoDB.Server;
@@ -38,7 +50,7 @@ var app = express();
 var users = new Users(db),
 	folders = new Folders(db),
 	notes = new Notes.Handler(db),
-	auth = new Auth(users);
+	auth = new Auth.Handler(users);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

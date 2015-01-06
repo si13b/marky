@@ -4,12 +4,14 @@ var Util = require('./util'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger();
 
-var Auth = Util.Class({
-	init: function(userModule) {
+export class Handler {
+	private _userModule;
+	
+	constructor(userModule) {
 		this._userModule = userModule;
-	},
+	}
 
-	checkError: function (req, res, err, object) {
+	checkError(req, res, err, object) {
 		if (!err && object) return false;
 		logger.error(err);
 
@@ -19,9 +21,9 @@ var Auth = Util.Class({
 		}));
 
 		return true;
-	},
+	}
 
-	signup: function (req, res) {
+	signup(req, res) {
 		var signupError = function (message) {
 			// TODO Get error message to user somehow
 			logger.error(message);
@@ -54,7 +56,7 @@ var Auth = Util.Class({
 			logger.info('Account created');
 			res.redirect('index.html'); // TODO Get rid of these manual redirections
 		}.bind(this);
-	},
+	}
 
 	/**
 	 * Authenticate user and initiate session if necessary.
@@ -62,7 +64,7 @@ var Auth = Util.Class({
 	 * Credentials must be in the request or in the session, otherwise the user
 	 * is redirected to the login page.
 	 */
-	check: function (req, res, next) {
+	check(req, res, next) {
 		if (!req.session.password && req.body.password && req.body.username) {
 			// Attempt to start new session using requested user/pass
 			this._userModule.checkUser(req.body.username, req.body.password, function (err, result) {
@@ -85,9 +87,9 @@ var Auth = Util.Class({
 			// No user/pass in request or session! Redirect to login.
 			this.checkError(req, res, new Error('User/pass not specified, redirecting to home'), null);
 		}
-	},
+	}
 
-	logout: function (req, res) {
+	logout(req, res) {
 		if (req.session.password) req.session.password = null;
 		if (req.session.username) req.session.username = null;
 		if (req.method === 'GET') res.redirect('index.html');
@@ -95,6 +97,4 @@ var Auth = Util.Class({
 			unauthenticated: true
 		}));
 	}
-});
-
-module.exports = Auth;
+}
