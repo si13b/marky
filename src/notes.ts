@@ -36,7 +36,7 @@ export interface Folder extends TreeItem {
 }
 
 /**
- * Class for handling requests pertaining to notes or the tree.
+ * Class for handling requests and data access for notes and the tree of notes and folders.
  */
 export class Handler {
 	private _db: MongoDB.Db;
@@ -45,6 +45,12 @@ export class Handler {
 		this._db = db;
 	}
 
+	/**
+	 * Retrieve the full tree of notes and folders for the current user.
+	 *
+	 * @param req
+	 * @param resp
+	 */
 	getTree(req, resp) {
 		var folders: MongoDB.Collection = this._db.collection('folders');
 		var notes: MongoDB.Collection = this._db.collection('notes');
@@ -109,6 +115,12 @@ export class Handler {
 		}.bind(this));
 	}
 
+	/**
+	 * Dump all notes for the current user as a ZIP binary for download.
+	 *
+	 * @param req
+	 * @param resp
+	 */
 	dump(req, resp) {
 		var notes: MongoDB.Collection = this._db.collection('notes');
 
@@ -129,6 +141,12 @@ export class Handler {
 		});
 	}
 
+	/**
+	 * Create a new note in the database with the given name and parent.
+	 *
+	 * @param req
+	 * @param resp
+	 */
 	addNote(req, resp) {
 		// name, parent
 		var notes: MongoDB.Collection = this._db.collection('notes');
@@ -146,6 +164,11 @@ export class Handler {
 		});
 	}
 
+	/**
+	 *
+	 * @param req
+	 * @param resp
+	 */
 	deleteNote(req, resp) {
 		var notes: MongoDB.Collection = this._db.collection('notes');
 

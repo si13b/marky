@@ -3,3 +3,4 @@ tests/reports/
 tests/screenshots/
 typings/
 build/
+*.iml

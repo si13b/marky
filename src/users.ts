@@ -21,6 +21,9 @@ export interface User {
 	email: string;
 }
 
+/**
+ * Class for managing requests and data access for user data.
+ */
 export class Handler {
 	private _db: MongoDB.Db;
 
@@ -28,6 +31,12 @@ export class Handler {
 		this._db = db;
 	}
 
+	/**
+	 * Retrieve the given user from the database and pass the object to the callback.
+	 *
+	 * @param username
+	 * @param callback
+	 */
 	getUser(username: string, callback: Function) {
 		var users = this._db.collection('users');
 
@@ -41,6 +50,14 @@ export class Handler {
 		users.findOne({username: username}, callback);
 	}
 
+	/**
+	 * Check if the given username and password is valid. The check is considered to be passed if no error is
+	 * passed through to the callback.
+	 *
+	 * @param username
+	 * @param password
+	 * @param callback
+	 */
 	checkUser(username: string, password: string, callback: Function) {
 		var users: MongoDB.Collection = this._db.collection('users'),
 			hashes: MongoDB.Collection = this._db.collection('hashes'),
@@ -87,6 +104,16 @@ export class Handler {
 
 	}
 
+	/**
+	 * If the given user does not exist, then create it, otherwise update the details of the given user and create a
+	 * new hash for the supplied password.
+	 *
+	 * @param login
+	 * @param email
+	 * @param name
+	 * @param password
+	 * @param callback
+	 */
 	updateUser(login: string, email: string, name: string, password: string, callback: Function) {
 		var users: MongoDB.Collection = this._db.collection('users');
 		users.findOne({username: login}, function(err, item) {
@@ -114,6 +141,15 @@ export class Handler {
 		}.bind(this));
 	}
 
+	/**
+	 * Having retrieved and/or created the given user, update the details of the given user and create a
+	 * new hash for the supplied password.
+	 *
+	 * @param user
+	 * @param password
+	 * @param callback
+	 * @private
+	 */
 	_doUpdateUser(user: User, password: string, callback: Function) {
 		var users: MongoDB.Collection = this._db.collection('users'),
 			hashes: MongoDB.Collection = this._db.collection('hashes');
@@ -135,26 +171,5 @@ export class Handler {
 
 			if (callback) callback(err, true);
 		});
-	}
-
-	/**
-	 * Remove the stored salt for a particular user.
-	 * @param username
-	 * @param callback
-	 */
-	clearUser(username: string, callback: Function) {
-		var users = this._db.collection('users');
-		users.findOne({username: username}, function(err, user: User) {
-			if (err || !user) {
-				logger.error(err.toString());
-
-				if (callback) callback(err);
-				return;
-			}
-
-			user.salt = null;
-			users.save(user, null);
-			if (callback) callback(null, true);
-		}.bind(this));
 	}
 }

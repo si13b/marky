@@ -4,6 +4,6 @@
     "host": "localhost",
     "port": 27017,
     "name": "marky"
-  },
-	"cookieSecret": "zT6ptMb5VL4vvEPN3fajVNCuHPqbCwjr5TpyWfpXKBQYREnnz8NSv7P8bsGHge7LMmwQjWCRLtCZk3SrM4xBW22mfZ6GwBpUwPvwzkCZWFM4bLvebEnZAhwesYjmdpCn"
+  }, 
+  "cookieSecret": "zT6ptMb5VL4vvEPN3fajVNCuHPqbCwjr5TpyWfpXKBQYREnnz8NSv7P8bsGHge7LMmwQjWCRLtCZk3SrM4xBW22mfZ6GwBpUwPvwzkCZWFM4bLvebEnZAhwesYjmdpCn"
 }
