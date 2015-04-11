@@ -13,11 +13,11 @@ import cookieParser = require('cookie-parser');
 import expressSession = require('express-session');
 import log4js = require('log4js');
 import Notes = require('./notes');
+import Folders = require('./folders');
+import Users = require('./users');
+import Auth = require('./auth');
 
-var	Folders = require('./folders'),
-	Users = require('./users'),
-	Auth = require('./auth'),
-	config = require('./../config.json'),
+var config = require('./../config.json'),
 	logger = log4js.getLogger(),
 	Db = MongoDB.Db,
 	Server = MongoDB.Server;
@@ -35,10 +35,11 @@ db.open(function(err: Error, db: MongoDB.Db) {
 
 var app = express();
 
-var users = new Users(db),
-	folders = new Folders(db),
+var users = new Users.Handler(db),
+	folders = new Folders.Handler(db),
 	notes = new Notes.Handler(db),
-	auth = new Auth(users);
+	auth = new Auth.Handler(users),
+	authChecker: express.RequestHandler = auth.check.bind(auth);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -49,25 +50,30 @@ app.use(function(req, res, next) {
 	logger.info(req.method + ' ' + req.url);
 	next();
 });
+app.use(function(err: any, req: any, res: any, next: Function) {
+	logger.error('An error occurred: ' + err.stack);
+	res.status(500);
+	next(err);
+});
 
-app.post('/login', auth.check, function(req, res) {
+app.post('/login', authChecker, function(req, res) {
 	res.redirect('app.html');
 });
-app.post('/signup', auth.signup);
-app.post('/logout', auth.logout);
-app.post('/download', auth.check, notes.dump);
-app.post('/note/add', auth.check, notes.addNote);
-app.post('/note/delete', auth.check, notes.deleteNote);
-app.post('/note/content/get', auth.check, notes.getContent);
-app.post('/note/content/save', auth.check, notes.saveContent);
-app.post('/note/rename', auth.check, notes.saveName);
-app.post('/note/move', auth.check, notes.move);
-app.post('/folder/tree', auth.check, notes.getTree);
-app.post('/folder/list', auth.check, folders.getFolders);
-app.post('/folder/delete', auth.check, folders.deleteFolder);
-app.post('/folder/rename', auth.check, folders.renameFolder);
-app.post('/folder/add', auth.check, folders.addFolder);
-app.post('/folder/colour', auth.check, folders.saveColour);
+app.post('/signup', auth.signup.bind(auth));
+app.post('/logout', auth.logout.bind(auth));
+app.post('/download', authChecker, notes.dump.bind(notes));
+app.post('/note/add', authChecker, notes.addNote.bind(notes));
+app.post('/note/delete', authChecker, notes.deleteNote.bind(notes));
+app.post('/note/content/get', authChecker, notes.getContent.bind(notes));
+app.post('/note/content/save', authChecker, notes.saveContent.bind(notes));
+app.post('/note/rename', authChecker, notes.saveName.bind(notes));
+app.post('/note/move', authChecker, notes.move.bind(notes));
+app.post('/folder/tree', authChecker, notes.getTree.bind(notes));
+app.post('/folder/list', authChecker, folders.getFolders.bind(folders));
+app.post('/folder/delete', authChecker, folders.deleteFolder.bind(folders));
+app.post('/folder/rename', authChecker, folders.renameFolder.bind(folders));
+app.post('/folder/add', authChecker, folders.addFolder.bind(folders));
+app.post('/folder/colour', authChecker, folders.saveColour.bind(folders));
 
 app.listen(config.port);
 console.log('Now listening on port 3000...');

@@ -18,20 +18,26 @@ var Db = MongoDB.Db,
 
 // See docs @ http://mongodb.github.io/node-mongodb-native/
 
-export interface Note {
-	_id: string;
+export interface TreeItem {
+	_id?: MongoDB.ObjectID;
 	name: string;
+	parent?: MongoDB.ObjectID;
+	user?: string;
+}
+
+export interface Note extends TreeItem {
 	content: string;
 }
 
-export interface Folder {
-	_id: string;
-	name: string;
-	colour: string;
+export interface Folder extends TreeItem {
+	colour?: string;
 	folder: boolean;
 	items: Note[]
 }
 
+/**
+ * Class for handling requests pertaining to notes or the tree.
+ */
 export class Handler {
 	private _db: MongoDB.Db;
 
@@ -40,21 +46,21 @@ export class Handler {
 	}
 
 	getTree(req, resp) {
-		var folders = this._db.collection('folders');
-		var notes = this._db.collection('notes');
+		var folders: MongoDB.Collection = this._db.collection('folders');
+		var notes: MongoDB.Collection = this._db.collection('notes');
 
-		var tree = [];
+		var tree: TreeItem[] = [];
 
 		var c = 0, ready = false;
 
-		folders.find({user: req.session.username}).toArray(function(err, docs) {
+		folders.find({user: req.session.username}).toArray(function(err: Error, docs: Folder[]) {
 			if (err) {
-				logger.error(err);
+				logger.error(err.message);
 				resp.end(500, "Error retrieving tree");
 				return;
 			}
 
-			docs.forEach(function(folderItem) {
+			docs.forEach(function(folderItem: Folder) {
 				var o: Folder = {
 					_id: folderItem._id,
 					name: folderItem.name,
@@ -65,11 +71,11 @@ export class Handler {
 				};
 
 				c++;
-				notes.find({parent: folderItem._id, user: req.session.username}).toArray(function(err, noteDocs) {
+				notes.find({parent: folderItem._id, user: req.session.username}).toArray(function(err: Error, noteDocs: Note[]) {
 					c--;
 					if (!o.items) o.items = [];
 
-					noteDocs.forEach(function(noteItem) {
+					noteDocs.forEach(function(noteItem: Note) {
 						o.items.push({
 							_id: noteItem._id,
 							name: noteItem.name,
@@ -84,10 +90,10 @@ export class Handler {
 			}.bind(this));
 
 			c++;
-			notes.find({user: req.session.username}).toArray(function(err, noteDocs) {
+			notes.find({user: req.session.username}).toArray(function(err: Error, noteDocs: Note[]) {
 				c--;
 
-				noteDocs.forEach(function(noteItem) {
+				noteDocs.forEach(function(noteItem: Note) {
 					if (noteItem.parent) return;
 					tree.push({
 						_id: noteItem._id,
@@ -104,12 +110,18 @@ export class Handler {
 	}
 
 	dump(req, resp) {
-		var notes = this._db.collection('notes');
+		var notes: MongoDB.Collection = this._db.collection('notes');
 
-		notes.find({user: req.session.username}).toArray(function(err, noteDocs) {
+		notes.find({user: req.session.username}).toArray(function(err: Error, noteDocs) {
+			if (err || !item) {
+				logger.error(err.toString());
+				resp.end(500, "Could not retrieve content");
+				return;
+			}
+
 			var zip = new Zip();
 
-			noteDocs.forEach(function(noteItem) {
+			noteDocs.forEach(function(noteItem: Note) {
 				zip.file(noteItem.name + '.md', noteItem.content);
 			}.bind(this))
 
@@ -119,9 +131,9 @@ export class Handler {
 
 	addNote(req, resp) {
 		// name, parent
-		var notes = this._db.collection('notes');
+		var notes: MongoDB.Collection = this._db.collection('notes');
 
-		var o = {
+		var o: Note = {
 			name: req.body.name,
 			parent: req.body.parent,
 			content: '',
@@ -129,13 +141,13 @@ export class Handler {
 		};
 
 		// _id generated automatically
-		notes.insert(o, {w: 1}, function(err, result) {
+		notes.insert(o, {w: 1}, function(err: Error, result) {
 			resp.end(JSON.stringify(o));
 		});
 	}
 
 	deleteNote(req, resp) {
-		var notes = this._db.collection('notes');
+		var notes: MongoDB.Collection = this._db.collection('notes');
 
 		notes.remove({_id: new ObjectID(req.body.note)}, true);
 
@@ -145,11 +157,11 @@ export class Handler {
 	}
 
 	getContent(req, resp) {
-		var notes = this._db.collection('notes');
+		var notes: MongoDB.Collection = this._db.collection('notes');
 
-		notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
+		notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err: Error, item: Note) {
 			if (err || !item) {
-				logger.error(err);
+				logger.error(err.toString());
 				resp.end(500, "Could not retrieve content");
 				return;
 			}
@@ -168,9 +180,9 @@ export class Handler {
 
 		var notes: MongoDB.Collection = this._db.collection('notes');
 
-		notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
+		notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err: Error, item: Note) {
 			if (err || !item) {
-				logger.error(err);
+				logger.error(err.toString());
 				resp.end(JSON.stringify({
 					error: err || 'Object is null'
 				}));
@@ -188,14 +200,15 @@ export class Handler {
 	}
 
 	saveName(req, resp) {
-		var notes = this._db.collection('notes');
+		var notes: MongoDB.Collection = this._db.collection('notes');
 
-		notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
-			if (err || !item) {
-				logger.error(err);
+		notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err: Error, item: Note) {
+			if (err) throw err;
+			/*if (err || !item) {
+				logger.error(err.toString());
 				resp.end(500, "Could not save note name");
 				return;
-			}
+			}*/
 
 			item.name = req.body.name;
 
@@ -208,11 +221,11 @@ export class Handler {
 	}
 
 	move(req, resp) {
-		var notes = this._db.collection('notes');
+		var notes: MongoDB.Collection = this._db.collection('notes');
 
-		notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err, item) {
+		notes.findOne({_id: new ObjectID(req.body.note), user: req.session.username}, function(err: Error, item: Note) {
 			if (err || !item) {
-				logger.error(err);
+				logger.error(err.toString());
 				resp.end(500, "Could not move note");
 				return;
 			}
@@ -226,4 +239,4 @@ export class Handler {
 			}));
 		}.bind(this));
 	}
-};
+}

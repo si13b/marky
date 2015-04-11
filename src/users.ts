@@ -1,22 +1,34 @@
-var Util = require('./util');
-var Db = require('mongodb').Db,
-	MongoClient = require('mongodb').MongoClient,
-	ObjectID = require('mongodb').ObjectID,
-	Server = require('mongodb').Server,
-	crypto = require('crypto'),
+///<reference path='../typings/node/node.d.ts' />
+///<reference path='../typings/mongodb/mongodb.d.ts' />
+///<reference path='../typings/body-parser/body-parser.d.ts' />
+///<reference path='../typings/cookie-parser/cookie-parser.d.ts' />
+///<reference path='../typings/express-session/express-session.d.ts' />
+///<reference path='../typings/log4js/log4js.d.ts' />
+
+import MongoDB = require('mongodb');
+import log4js = require('log4js');
+import Notes = require('./notes');
+
+var crypto = require('crypto'),
 	Zip = require('node-zip'),
-	log4js = require('log4js'),
 	logger = log4js.getLogger();
 
-// See docs @ http://mongodb.github.io/node-mongodb-native/
+export interface User {
+	_id?: MongoDB.ObjectID;
+	salt?: string;
+	name: string;
+	username: string;
+	email: string;
+}
 
-var Users = Util.Class({
+export class Handler {
+	private _db: MongoDB.Db;
 
-	init: function(db) {
+	constructor(db: MongoDB.Db) {
 		this._db = db;
-	},
+	}
 
-	getUser: function(username, callback) {
+	getUser(username: string, callback: Function) {
 		var users = this._db.collection('users');
 
 		if (!callback) return;
@@ -27,12 +39,12 @@ var Users = Util.Class({
 		}
 
 		users.findOne({username: username}, callback);
-	},
+	}
 
-	checkUser: function(username, password, callback) {
-		var users = this._db.collection('users'),
-			hashes = this._db.collection('hashes'),
-			thisUser = null;
+	checkUser(username: string, password: string, callback: Function) {
+		var users: MongoDB.Collection = this._db.collection('users'),
+			hashes: MongoDB.Collection = this._db.collection('hashes'),
+			thisUser: User = null;
 
 		if (!callback) return;
 
@@ -41,9 +53,9 @@ var Users = Util.Class({
 			return;
 		}
 
-		users.findOne({username: username}, function(err, user) {
+		users.findOne({username: username}, function(err: Error, user: User) {
 			if (err || !user) {
-				logger.error(err);
+				logger.error(err.toString());
 				callback(new Error('Could not retrieve user'));
 				return;
 			}
@@ -62,9 +74,9 @@ var Users = Util.Class({
 			hashes.findOne({hash: sha512.digest('hex')}, onHashFound);
 		});
 
-		var onHashFound = function(err, item) {
+		var onHashFound = function(err: Error, item) {
 			if (err || !item) {
-				logger.error(err);
+				logger.error(err.toString());
 
 				callback(new Error('Could not validate token'));
 				return;
@@ -73,20 +85,22 @@ var Users = Util.Class({
 			callback(null, true);
 		}.bind(this)
 
-	},
+	}
 
-	updateUser: function(login, email, name, password, callback) {
-		var users = this._db.collection('users');
+	updateUser(login: string, email: string, name: string, password: string, callback: Function) {
+		var users: MongoDB.Collection = this._db.collection('users');
 		users.findOne({username: login}, function(err, item) {
 			if (err || !item) {
-				users.insert({
+				var newUser: User = {
 					username: login,
 					email: email,
 					name: name
-				}, {w: 1}, function(err, result) {
+				};
+
+				users.insert(newUser, {w: 1}, function(err: Error, result: User[]) {
 					if (err || !result || !result.length) {
-						logger.error(err);
-						resp.end(500, "Error creating user");
+						logger.error(err.toString());
+						// resp.end(500, "Error creating user");
 						return;
 					}
 
@@ -98,46 +112,49 @@ var Users = Util.Class({
 
 			this._doUpdateUser(item, password, callback);
 		}.bind(this));
-	},
+	}
 
-	_doUpdateUser: function(user, password, callback) {
-		var users = this._db.collection('users'),
-			hashes = this._db.collection('hashes');
+	_doUpdateUser(user: User, password: string, callback: Function) {
+		var users: MongoDB.Collection = this._db.collection('users'),
+			hashes: MongoDB.Collection = this._db.collection('hashes');
 
 		user.salt = crypto.randomBytes(256);
-		users.save(user);
+		users.save(user, null);
 
 		var sha512 = crypto.createHash('sha512');
 		sha512.update(user.salt + password);
 
 		hashes.insert({
 			hash: sha512.digest('hex')
-		}, {w: 1}, function(err, result) {
+		}, {w: 1}, function(err: Error, result) {
 			if (err) {
-				logger.error(err);
-				resp.end(500, "Error creating user");
+				logger.error(err.toString());
+				// resp.end(500, "Error creating user");
 				return;
 			}
 
 			if (callback) callback(err, true);
 		});
-	},
+	}
 
-	clearUser: function(username, callback) {
+	/**
+	 * Remove the stored salt for a particular user.
+	 * @param username
+	 * @param callback
+	 */
+	clearUser(username: string, callback: Function) {
 		var users = this._db.collection('users');
-		users.findOne({username: username}, function(err, user) {
+		users.findOne({username: username}, function(err, user: User) {
 			if (err || !user) {
-				log.error(err);
+				logger.error(err.toString());
 
 				if (callback) callback(err);
 				return;
 			}
 
 			user.salt = null;
-			users.save(user);
+			users.save(user, null);
 			if (callback) callback(null, true);
 		}.bind(this));
 	}
-});
-
-module.exports = Users;
+}

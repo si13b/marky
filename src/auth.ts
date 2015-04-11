@@ -1,17 +1,33 @@
-var Util = require('./util'),
+///<reference path='../typings/node/node.d.ts' />
+///<reference path='../typings/mongodb/mongodb.d.ts' />
+///<reference path='../typings/body-parser/body-parser.d.ts' />
+///<reference path='../typings/cookie-parser/cookie-parser.d.ts' />
+///<reference path='../typings/express-session/express-session.d.ts' />
+///<reference path='../typings/log4js/log4js.d.ts' />
+
+import MongoDB = require('mongodb');
+import log4js = require('log4js');
+import Users = require('./users');
+
+var crypto = require('crypto'),
+	Zip = require('node-zip'),
+	logger = log4js.getLogger(),
 	https = require('https'),
-	querystring = require('querystring'),
-	log4js = require('log4js'),
-	logger = log4js.getLogger();
+	querystring = require('querystring');
 
-var Auth = Util.Class({
-	init: function(userModule) {
+/**
+ * Handle authentication
+ */
+export class Handler {
+	private _userModule: Users.Handler;
+
+	constructor(userModule: Users.Handler) {
 		this._userModule = userModule;
-	},
+	}
 
-	checkError: function (req, res, err, object) {
+	checkError(req, res, err: Error, object) {
 		if (!err && object) return false;
-		logger.error(err);
+		logger.error(err.toString());
 
 		if (req.method === 'GET') res.redirect('index.html');
 		else res.send(401, JSON.stringify({
@@ -19,17 +35,22 @@ var Auth = Util.Class({
 		}));
 
 		return true;
-	},
+	}
 
-	signup: function (req, res) {
-		var signupError = function (message) {
+	/**
+	 * Create a new user in the database.
+	 * @param req
+	 * @param res
+	 */
+	signup(req, res) {
+		var signupError = function(message: string) {
 			// TODO Get error message to user somehow
 			logger.error(message);
 
 			res.redirect('signup.html');
 		}.bind(this);
 
-		this._userModule.getUser(req.body.username, function (err, user) {
+		this._userModule.getUser(req.body.username, function(err: Error, user: Users.User) {
 			if (!err && user) { // Existing user shouldn't exist
 				signupError('Username taken');
 				return;
@@ -45,7 +66,7 @@ var Auth = Util.Class({
 			this._userModule.updateUser(req.body.username, req.body.email, req.body.name, req.body.password, onCreateUser);
 		}.bind(this));
 
-		var onCreateUser = function (err, result) {
+		var onCreateUser = function (err: Error, result: boolean) {
 			if (err || !result) {
 				signupError();
 				return;
@@ -54,7 +75,7 @@ var Auth = Util.Class({
 			logger.info('Account created');
 			res.redirect('index.html'); // TODO Get rid of these manual redirections
 		}.bind(this);
-	},
+	}
 
 	/**
 	 * Authenticate user and initiate session if necessary.
@@ -62,11 +83,12 @@ var Auth = Util.Class({
 	 * Credentials must be in the request or in the session, otherwise the user
 	 * is redirected to the login page.
 	 */
-	check: function (req, res, next) {
+	check(req, res, next: Function) {
 		if (!req.session.password && req.body.password && req.body.username) {
 			// Attempt to start new session using requested user/pass
-			this._userModule.checkUser(req.body.username, req.body.password, function (err, result) {
+			this._userModule.checkUser(req.body.username, req.body.password, function(err: Error, result) {
 				if (this.checkError(req, res, err, result)) return;
+
 
 				req.session.username = req.body.username;
 				req.session.password = req.body.password;
@@ -76,7 +98,7 @@ var Auth = Util.Class({
 
 		} else if (req.session.username && req.session.password) {
 			// Continuing an existing session with stored user/pass
-			this._userModule.checkUser(req.session.username, req.session.password, function (err, result) {
+			this._userModule.checkUser(req.session.username, req.session.password, function (err: Error, result) {
 				if (this.checkError(req, res, err, result)) return;
 
 				next();
@@ -85,9 +107,15 @@ var Auth = Util.Class({
 			// No user/pass in request or session! Redirect to login.
 			this.checkError(req, res, new Error('User/pass not specified, redirecting to home'), null);
 		}
-	},
+	}
 
-	logout: function (req, res) {
+	/**
+	 * Terminate the use session
+	 *
+	 * @param req
+	 * @param res
+	 */
+	logout(req, res) {
 		if (req.session.password) req.session.password = null;
 		if (req.session.username) req.session.username = null;
 		if (req.method === 'GET') res.redirect('index.html');
@@ -95,6 +123,4 @@ var Auth = Util.Class({
 			unauthenticated: true
 		}));
 	}
-});
-
-module.exports = Auth;
+}
